@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+import pacman
 
 class SearchProblem:
     """
@@ -87,6 +88,32 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
+    from game import Directions
+    closed = {}
+
+    """fringe is a stack of current pacman states in the format (pos, direction)"""
+    fringe = util.Stack.__init__()
+    while not fringe.isEmpty(self):
+
+        (x,y) = pacman.getPacmanPosition()
+        """goal test"""
+        if pacman.hasFood(x, y):
+            return fringe
+
+        (currPacman) = pacman.getPacmanState()
+        if not closed.has_key(currPacman):
+            closed.put(currPacman)
+            futureDirections = pacman.PacmanRules.getLegalActions()
+            (currX, currY) = currPacman.getPosition()
+            for futureDirect in futureDirections:
+                if futureDirect == North:
+                    fringe.push(AgentState.__init__(configuration.__init__((currX, currY+1), North), True))
+                elif futureDirect == West:
+                    fringe.push(AgentState.__init__(configuration.__init__((currX-1, currY), West), True))
+                elif futureDirect == South:
+                    fringe.push(AgentState.__init__(configuration.__init__((currX, currY-1), South), True))
+                elif futureDirect == East:
+                    fringe.push(AgentState.__init__(configuration.__init__((currX+1, currY), East), True))
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
