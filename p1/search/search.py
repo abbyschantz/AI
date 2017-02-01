@@ -20,6 +20,8 @@ Pacman agents (in searchAgents.py).
 
 import util
 import pacman
+import pdb
+
 
 class SearchProblem:
 	"""
@@ -97,25 +99,26 @@ def depthFirstSearch(problem):
 	startState = problem.getStartState()
 	fringe.push(startState)
 
-	trackingList = []
-	trackingList.append(startState)
-
 	actionList = []
-
+	
 	while not fringe.isEmpty():
 		curr = fringe.pop()
-
-		trackingList.pop()
-		trackingList.append(curr)
-
 
 		if problem.isGoalState(curr):
 			return actionList
 		if not (curr in closed):
 			closed.add(curr)
 			succList = problem.getSuccessors(curr)
+			
 			for (successor, action, cost) in succList:
 				fringe.push(successor)
+
+				if len(actionList) != 0:
+					popped = actionList.pop()
+					poppedChar = popped[2]
+					if action[2] != poppedChar:
+						actionList.append(popped)
+				actionList.append(action)
 
 	util.raiseNotDefined()
 
