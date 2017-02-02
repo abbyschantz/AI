@@ -125,6 +125,11 @@ def generalizedSearch(problem, dataStruc):
 
 
 	util.raiseNotDefined()
+class PQNode:
+	def  __init__(self, state, action, cost):
+		self.state = state
+		self.action = action
+		self.cost = cost
 
 def uniformCostSearch(problem):
 	"""Search the node of least total cost first."""
@@ -134,10 +139,13 @@ def uniformCostSearch(problem):
 
 	startState = problem.getStartState()
 	fringe = util.PriorityQueue()
-	fringe.push((startState, []),0)
+	fringe.push(PQNode(startState, [], 0),0)
 
 	while not fringe.isEmpty():
-		((curr, action), cost) = fringe.pop()
+		node = fringe.pop()
+		curr = node.state
+		action = node.action
+		cost = node.cost
 		#currAction = action[0]
 
 		if problem.isGoalState(curr):
@@ -146,7 +154,7 @@ def uniformCostSearch(problem):
 			closed.add(curr)
 			succList = problem.getSuccessors(curr)
 			for (successor, direction, currCost) in succList:
-				fringe.push((successor, action+[direction]), cost+currCost)
+				fringe.push(PQNode(successor, action+[direction], cost+currCost), cost+currCost)
 	util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
