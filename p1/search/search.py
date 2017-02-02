@@ -125,6 +125,8 @@ def generalizedSearch(problem, dataStruc):
 
 
 	util.raiseNotDefined()
+
+"""not perfect memory wise"""
 class PQNode:
 	def  __init__(self, state, action, cost):
 		self.state = state
@@ -167,6 +169,29 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
 	"""Search the node that has the lowest combined cost and heuristic first."""
 	"*** YOUR CODE HERE ***"
+
+	closed = set()
+
+	startState = problem.getStartState()
+	fringe = util.PriorityQueue()
+	fringe.push(PQNode(startState, [], 0),0)
+
+	while not fringe.isEmpty():
+		node = fringe.pop()
+		curr = node.state
+		action = node.action
+		cost = node.cost
+		#currAction = action[0]
+
+		if problem.isGoalState(curr):
+			return action
+		if not (curr in closed):
+			closed.add(curr)
+			succList = problem.getSuccessors(curr)
+			for (successor, direction, currCost) in succList:
+				estCost = heuristic(successor, problem)
+				fringe.push(PQNode(successor, action+[direction], cost+currCost), estCost+cost+currCost)
+
 	util.raiseNotDefined()
 
 
