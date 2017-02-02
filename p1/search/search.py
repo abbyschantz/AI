@@ -129,6 +129,24 @@ def generalizedSearch(problem, dataStruc):
 def uniformCostSearch(problem):
 	"""Search the node of least total cost first."""
 	"*** YOUR CODE HERE ***"
+
+	closed = set()
+
+	startState = problem.getStartState()
+	fringe = util.PriorityQueue()
+	fringe.push((startState, []),0)
+
+	while not fringe.isEmpty():
+		((curr, action), cost) = fringe.pop()
+		#currAction = action[0]
+
+		if problem.isGoalState(curr):
+			return action
+		if not (curr in closed):
+			closed.add(curr)
+			succList = problem.getSuccessors(curr)
+			for (successor, direction, currCost) in succList:
+				fringe.push((successor, action+[direction]), cost+currCost)
 	util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
