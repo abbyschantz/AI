@@ -92,15 +92,27 @@ def depthFirstSearch(problem):
 	"""
 	"*** YOUR CODE HERE ***"
 	#working on the implementation of the actionlist; currently printing a list of actions that is incorrect
+	stk = util.Stack()
+	return generalizedSearch(problem, stk)
+	util.raiseNotDefined()
 
+
+
+def breadthFirstSearch(problem):
+	"""Search the shallowest nodes in the search tree first."""
+	"*** YOUR CODE HERE ***"
+	queue = util.Queue()
+	return generalizedSearch(problem, queue)
+	util.raiseNotDefined()
+
+def generalizedSearch(problem, dataStruc):
 	closed = set()
 
-	fringe = util.Stack()
 	startState = problem.getStartState()
-	fringe.push((startState, []))
+	dataStruc.push((startState, []))
 
-	while not fringe.isEmpty():
-		(curr, action) = fringe.pop()
+	while not dataStruc.isEmpty():
+		(curr, action) = dataStruc.pop()
 		#currAction = action[0]
 
 		if problem.isGoalState(curr):
@@ -109,16 +121,9 @@ def depthFirstSearch(problem):
 			closed.add(curr)
 			succList = problem.getSuccessors(curr)
 			for (successor, direction, cost) in succList:
-				fringe.push((successor, action+[direction]))
+				dataStruc.push((successor, action+[direction]))
 
 
-	util.raiseNotDefined()
-
-
-
-def breadthFirstSearch(problem):
-	"""Search the shallowest nodes in the search tree first."""
-	"*** YOUR CODE HERE ***"
 	util.raiseNotDefined()
 
 def uniformCostSearch(problem):
