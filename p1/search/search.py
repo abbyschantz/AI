@@ -97,7 +97,7 @@ def depthFirstSearch(problem):
 
 	fringe = util.Stack()
 	startState = problem.getStartState()
-	fringe.push((startState, [None]))
+	fringe.push((startState, []))
 
 	while not fringe.isEmpty():
 		(curr, action) = fringe.pop()
@@ -109,8 +109,8 @@ def depthFirstSearch(problem):
 			closed.add(curr)
 			succList = problem.getSuccessors(curr)
 			for (successor, direction, cost) in succList:
-				fringe.push((successor, [action]+[direction]))
-				
+				fringe.push((successor, action+[direction]))
+
 
 	util.raiseNotDefined()
 
