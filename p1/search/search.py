@@ -106,22 +106,29 @@ def breadthFirstSearch(problem):
 	util.raiseNotDefined()
 
 def generalizedSearch(problem, dataStruc):
-	closed = set()
+	closed = []
 
 	startState = problem.getStartState()
-	dataStruc.push((startState, []))
+	startList = []
+	startList.append(startState)
+	dataStruc.push(startList)
 
 	while not dataStruc.isEmpty():
-		(curr, action) = dataStruc.pop()
-		#currAction = action[0]
-
+		"""[curr, action0, action1, action2,...., action n]"""
+		currAndActionsList = dataStruc.pop()
+		curr = currAndActionsList[0]
 		if problem.isGoalState(curr):
-			return action
+			return currAndActionsList[1:len(currAndActionsList)]
 		if not (curr in closed):
-			closed.add(curr)
+			closed.append(curr)
 			succList = problem.getSuccessors(curr)
 			for (successor, direction, cost) in succList:
-				dataStruc.push((successor, action+[direction]))
+				"""copy.copyOf(list)"""
+				newList = []
+				newList.append(successor)
+				newList.extend(currAndActionsList[1:len(currAndActionsList)])
+				newList.append(direction)
+				dataStruc.push(newList)
 
 
 	util.raiseNotDefined()
