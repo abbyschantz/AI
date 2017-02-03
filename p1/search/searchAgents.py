@@ -386,7 +386,6 @@ def cornersHeuristic(state, problem):
                     remCorners.remove(position)
 
         distance, closestCorner = min([(util.manhattanDistance(state[0], corner), corner) for corner in remCorners])
-        distance = distance*len(remCorners)
 
         return distance
 
