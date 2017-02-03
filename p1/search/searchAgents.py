@@ -373,14 +373,13 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    if state is None:
+    if problem.isGoalState(state):
         return 0
     else:
-        (position, cornerSet) = state
         distance = 0
-        if len(corners) != 0:
-            print state
-            distance, closestCorner = min([(util.manhattanDistance(position, corner), corner) for corner in corners])
+        if len(state) < 1:
+            print state[0]
+            distance, closestCorner = min([(util.manhattanDistance(position, corner), corner) for corner in state[1:len(state)]])
 
         distance = distance*3
 #3 times the distance from you to the closest corner
