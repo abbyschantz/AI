@@ -384,17 +384,11 @@ def cornersHeuristic(state, problem):
             for position in cornersInState:
                 if position in remCorners:
                     remCorners.remove(position)
-#
+
         distance, closestCorner = min([(util.manhattanDistance(state[0], corner), corner) for corner in remCorners])
-#
-        distance = distance*3
+        distance = distance*len(remCorners)
 
-        #print 'touched corners ,' cornersInState
         return distance
-        #3 times the distance from you to the closest corner
-
-    #if len(problem.heuristicInfo['foodGrid']) != 0:
-    #distance, food = max([(mazeDistance(state[0], food, problem.startingGameState), food) for food in LIST])
 
 
 class AStarCornersAgent(SearchAgent):
