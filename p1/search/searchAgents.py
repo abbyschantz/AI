@@ -554,13 +554,15 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         """
         x,y = state
 
-        "*** YOUR CODE HERE ***"
-        foods = self.food
-        listOfFood = [foods]
-        for food in listOfFood:
-            (distance,food) = min(util.manhattanDistance(state, food), food)
-        isGoal = state == foods
+         gotFood = self.food
+        #listOfFood = [foods]
+        listOfFood = gotFood.asList()
+        #for food in listOfFood:        
+        distance,food = min([(util.manhattanDistance(state, food), food) for food in listOfFood])
+
+        isGoal = state == food
         return isGoal
+
         util.raiseNotDefined()
 
 
