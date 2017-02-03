@@ -144,7 +144,29 @@ def uniformCostSearch(problem):
 	"""Search the node of least total cost first."""
 	"*** YOUR CODE HERE ***"
 
-	closed = set()
+	#closed = set()
+#
+	#startState = problem.getStartState()
+	#fringe = util.PriorityQueue()
+	#fringe.push(PQNode(startState, [], 0),0)
+#
+	#while not fringe.isEmpty():
+	#	node = fringe.pop()
+	#	curr = node.state
+	#	action = node.action
+	#	cost = node.cost
+		#currAction = action[0]
+#
+	#	if problem.isGoalState(curr):
+	#		return action
+	#	if not (curr in closed):
+	#		closed.add(curr)
+	#		succList = problem.getSuccessors(curr)
+	#		for (successor, direction, currCost) in succList:
+	#			fringe.push(PQNode(successor, action+[direction], cost+currCost), cost+currCost)
+	#util.raiseNotDefined()
+
+	closed = []
 
 	startState = problem.getStartState()
 	fringe = util.PriorityQueue()
@@ -160,7 +182,7 @@ def uniformCostSearch(problem):
 		if problem.isGoalState(curr):
 			return action
 		if not (curr in closed):
-			closed.add(curr)
+			closed.append(curr)
 			succList = problem.getSuccessors(curr)
 			for (successor, direction, currCost) in succList:
 				fringe.push(PQNode(successor, action+[direction], cost+currCost), cost+currCost)
@@ -177,7 +199,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 	"""Search the node that has the lowest combined cost and heuristic first."""
 	"*** YOUR CODE HERE ***"
 
-	closed = set()
+	closed = []
 
 	startState = problem.getStartState()
 	fringe = util.PriorityQueue()
@@ -193,7 +215,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 		if problem.isGoalState(curr):
 			return action
 		if not (curr in closed):
-			closed.add(curr)
+			closed.append(curr)
 			succList = problem.getSuccessors(curr)
 			for (successor, direction, currCost) in succList:
 				estCost = heuristic(successor, problem)

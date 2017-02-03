@@ -312,7 +312,7 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        """state is of form: [(x,y), ..., corner accessed n (if accessed)]"""
+        """state is of form: [(x,y), ..., corner accessed n (if accessed)] where (x,y) is the current (or last, perhaps) position"""
         isGoal = (1,1) in state and (1, self.top) in state and (self.right, 1) in state and (self.right, self.top) in state
 
         return isGoal
@@ -377,17 +377,27 @@ def cornersHeuristic(state, problem):
         return 0
     else:
         distance = 0
-        if len(state) < 1:
-            print state[0]
-            distance, closestCorner = min([(util.manhattanDistance(position, corner), corner) for corner in state[1:len(state)]])
+        remCorners = list(problem.corners)
+        cornersInState = []
+        if len(state) > 1:
+            cornersInState = state[1:len(state)]
+            for position in cornersInState:
+                if position in remCorners:
+                    remCorners.remove(position)
+#
+            distance, closestCorner = min([(util.manhattanDistance(position, corner), corner) for corner in remCorners])
+#
+            distance = distance*3
 
-        distance = distance*3
+            print 'touched corners ,' cornersInState
+            print 'untouched corners ', remCorners
+            return distance
+        else:
+            return 0
 #3 times the distance from you to the closest corner
 
     #if len(problem.heuristicInfo['foodGrid']) != 0:
     #distance, food = max([(mazeDistance(state[0], food, problem.startingGameState), food) for food in LIST])
-        return distance
-
 
 
 class AStarCornersAgent(SearchAgent):
