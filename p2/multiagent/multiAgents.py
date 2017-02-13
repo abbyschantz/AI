@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -74,7 +74,38 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        """keeping this as an idea: if ghost distance is less than some arb.
+        amount, turn around"""#
+        #closestDist = 999999
+        # Ghost: (x,y)=(18.0, 3.0), South
+        (pacx, pacy) = newPos
+        ghostNextDoor = False
+        closestGhostDist = 9999999
+        for ghostState in newGhostStates:
+            (x,y) = ghostState.getPosition()
+            currDistance = manhattanDistance(newPos, (x,y))
+            if (abs(x - pacx) == 1) or (abs(y - pacy) == 1):
+                ghostNextDoor = True
+            if currDistance < closestGhostDist:
+                closestGhostDist = currDistance
+        (foodx, foody) = 999999, 999999
+        closestFoodDist = 999999
+        print len(newFood)
+        #for (currX, currY) in newFood:
+
+                #currFoodDist = manhattanDistance(newPos, (currX, currY))
+                #if currFoodDist < closestFoodDist:
+                #    closestFoodDist = currFoodDist
+                #    (foodx, foody) = (currX, currY)
+
+        #print closestGhostDist
+        if ghostNextDoor:
+            return successorGameState.getScore() - 500
+        elif action == 'Stop':
+            return successorGameState.getScore() - 1
+        elif manhattanDistance(currentGameState.getPacmanPosition(), (foodx,foody)) > closestFoodDist:
+            return successorGameState.getScore() + (10/closestFoodDist)
+        return successorGameState.getScore() - closestGhostDist
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -176,4 +207,3 @@ def betterEvaluationFunction(currentGameState):
 
 # Abbreviation
 better = betterEvaluationFunction
-
