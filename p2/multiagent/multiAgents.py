@@ -95,7 +95,6 @@ class ReflexAgent(Agent):
 		(foodx, foody) = 999999, 999999
 		closestFoodDist = 999999
 		listOfFood = newFood.asList()
-		actionList = breadthFirstSearch(currentGameState)
 
 		for (x,y) in listOfFood:
 			manhattDistToCurr = manhattanDistance(newPos, (x,y))
@@ -114,7 +113,7 @@ class ReflexAgent(Agent):
 		#if (pacx == foodx) and ((foodx - pacx) =
 
 		if newPos in foodPathList:
-			print 'oh captain'
+			#print 'oh captain'
 			if len(foodPathList) <= 5:
 				stateChange = stateChange + (10/closestFoodDist)
 			else:
@@ -122,11 +121,12 @@ class ReflexAgent(Agent):
 		else:
 			#deviate from path, when ghost is within 5
 			stateChange = stateChange - 20
-			print 'captain'
+			#print 'captain'
 
 		#if ghost is scared and we're close enough, go towards the ghosts
 
-		return stateChange
+		#return stateChange
+		return 0
 
 def breadthFirstSearch(gameState):
 	"""Search the shallowest nodes in the search tree first."""
@@ -143,17 +143,20 @@ def generalizedSearch(gameState, dataStruc):
 	startList = []
 	startList.append(gameState.getPacmanPosition())
 	dataStruc.push(startList)
+	currFood = gameState.getFood()
+	currFoodList = currFood.asList()
 
 	while not dataStruc.isEmpty():
 		"""[(currx, curry), (x1,y1), (x2, y2), ..., (xn, yn)]"""
 		currAndActionsList = dataStruc.pop()
+		#print currAndActionsList
 		(currx, curry) = currAndActionsList[0]
-		currFood = gameState.getFood()
-		currFoodList = currFood.asList()
+
 
 		if (currx, curry) in currFoodList:
 			path = currAndActionsList[1:len(currAndActionsList)]
 			path.append((currx, curry))
+			#print path[0]
 			return path
 
 		if not ((currx,curry) in closed):
@@ -178,7 +181,8 @@ def generalizedSearch(gameState, dataStruc):
 
 				newList = []
 				newList.append((xn,yn))
-				newList.extend(currAndActionsList[1:len(currAndActionsList)])
+				#print newList
+				newList + currAndActionsList[1:len(currAndActionsList)]
 				dataStruc.push(newList)
 
 
@@ -243,7 +247,47 @@ class MinimaxAgent(MultiAgentSearchAgent):
 			Returns whether or not the game state is a losing state
 		"""
 		"*** YOUR CODE HERE ***"
+		depth = 1
+		return self.valueFunc(gameState, 0, depth)
+
 		util.raiseNotDefined()
+
+	def valueFunc(self, gameState, agentNumber, maxDepth):
+		print self.depth, 'pizza'
+		if gameState.isWin() or gameState.isLose() or (maxDepth-1 == self.depth):
+			return self.evaluationFunction(gameState)
+		else:
+			if agentNumber == 0:
+				return self.maxValue(gameState, agentNumber, maxDepth)
+			else:
+				return self.minValue(gameState, agentNumber, maxDepth)
+
+	def maxValue(self, gameState, agentNumber, maxDepth):
+		self.depth = self.depth + 1
+		score = -1*float("inf")
+		legalActions = gameState.getLegalActions(agentNumber)
+		successorStates = []
+		for action in legalActions:
+			successorStates.append(gameState.generateSuccessor(agentNumber, action))
+
+		for state in successorStates:
+			#score = max(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
+			modAgent =((agentNumber+1)% gameState.getNumAgents())
+			score = max(score, self.valueFunc(state, modAgent, maxDepth))
+		return score
+
+	def minValue(self, gameState, agentNumber, maxDepth):
+		score = float("inf")
+		legalActions = gameState.getLegalActions(agentNumber)
+		successorStates = []
+		for action in legalActions:
+			successorStates.append(gameState.generateSuccessor(agentNumber, action))
+
+		for state in successorStates:
+			#score = min(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
+			modAgent =((agentNumber+1)% gameState.getNumAgents())
+			score = min(score, self.valueFunc(state, modAgent, maxDepth))
+		return score
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
 	"""
