@@ -187,7 +187,7 @@ def generalizedSearch(gameState, dataStruc):
 
 
 	util.raiseNotDefined()
-
+	
 def scoreEvaluationFunction(currentGameState):
 	"""
 	  This default evaluation function just returns the score of the state.
@@ -325,6 +325,80 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 		  Returns the minimax action using self.depth and self.evaluationFunction
 		"""
 		"*** YOUR CODE HERE ***"
+		direction = self.actionDecider(gameState, self.depth)
+		return direction
+		util.raiseNotDefined()
+
+	def actionDecider(self, gameState, currDepth):
+		alpha = float("inf")
+		beta = -1*float("inf")
+		if currDepth == 0:
+			return Directions.STOP
+		else:
+			actionList = gameState.getLegalActions(0)
+			(maxAction, maxScore) = (actionList[0], -9999999)
+
+			agentNum = gameState.getNumAgents()
+			for action in actionList:
+				successor = gameState.generateSuccessor(0, action)
+				succScore = self.valueFunc(successor, (1 % agentNum), currDepth, alpha, beta)
+				if succScore > maxScore:
+					(maxAction, maxScore) = (action, succScore)
+
+			return maxAction
+
+
+	def valueFunc(self, gameState, agentNumber, currDepth, alpha, beta):
+		#print self.depth, agentNumber, 'pizza'
+		if agentNumber >= gameState.getNumAgents():
+			agentNumber = 0
+			currDepth = currDepth - 1
+
+		if gameState.isWin() or gameState.isLose() or (currDepth<=0):
+			#print 'hamburger', self.depth
+			return self.evaluationFunction(gameState)
+		else:
+			if agentNumber == 0:
+				return self.maxValue(gameState, agentNumber, currDepth, alpha, beta)
+			else:
+				return self.minValue(gameState, agentNumber, currDepth, alpha, beta)
+	#python passes by value for strings
+
+	def maxValue(self, gameState, agentNumber, currDepth, alpha, beta):
+		score = -1*float("inf")
+		legalActions = gameState.getLegalActions(agentNumber)
+		successorStates = []
+		for action in legalActions:
+			successorStates.append(gameState.generateSuccessor(agentNumber, action))
+
+		for state in successorStates:
+			#score = max(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
+			modAgent = (agentNumber+1)
+			newScore = self.valueFunc(state, modAgent, currDepth, alpha, beta)
+			score = max(score, newScore)
+			if score > beta:
+				return score
+			alpha = max(alpha, score)
+		#print score, agentNumber, 'hotdog'
+		return score
+
+	def minValue(self, gameState, agentNumber, currDepth, alpha, beta):
+		score = float("inf")
+		legalActions = gameState.getLegalActions(agentNumber)
+		successorStates = []
+		for action in legalActions:
+			successorStates.append(gameState.generateSuccessor(agentNumber, action))
+
+		for state in successorStates:
+			#score = min(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
+			modAgent =(agentNumber+1)
+			newScore = self.valueFunc(state, modAgent, currDepth, alpha, beta)
+			score = min(score, newScore)
+			if score < alpha:
+				return score
+			beta = min(beta, score)
+		#print score, agentNumber, 'chips'
+		return score
 		util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
