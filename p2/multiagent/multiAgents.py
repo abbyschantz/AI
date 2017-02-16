@@ -252,21 +252,28 @@ class MinimaxAgent(MultiAgentSearchAgent):
 		util.raiseNotDefined()
 
 	def actionDecider(self, gameState, currDepth):
-		actionList = gameState.getLegalActions(0)
-		(maxAction, maxScore) = (actionList[0], -9999999)
+		if currDepth == 0:
+			return Directions.STOP
+		else:
+			actionList = gameState.getLegalActions(0)
+			(maxAction, maxScore) = (actionList[0], -9999999)
 
-		agentNum = gameState.getNumAgents()
-		for action in actionList:
-			successor = gameState.generateSuccessor(0, action)
-			succScore = self.valueFunc(successor, (1 % agentNum), currDepth - 1)
-			if succScore > maxScore:
-				(maxAction, maxScore) = (action, succScore)
+			agentNum = gameState.getNumAgents()
+			for action in actionList:
+				successor = gameState.generateSuccessor(0, action)
+				succScore = self.valueFunc(successor, (1 % agentNum), currDepth)
+				if succScore > maxScore:
+					(maxAction, maxScore) = (action, succScore)
 
-		return maxAction
+			return maxAction
 
 
 	def valueFunc(self, gameState, agentNumber, currDepth):
 		#print self.depth, agentNumber, 'pizza'
+		if agentNumber >= gameState.getNumAgents():
+			agentNumber = 0
+			currDepth = currDepth - 1
+
 		if gameState.isWin() or gameState.isLose() or (currDepth<=0):
 			#print 'hamburger', self.depth
 			return self.evaluationFunction(gameState)
@@ -286,8 +293,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
 		for state in successorStates:
 			#score = max(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
-			modAgent = (agentNumber+1) % gameState.getNumAgents()
-			newScore = self.valueFunc(state, modAgent, currDepth - 1)
+			modAgent = (agentNumber+1)
+			newScore = self.valueFunc(state, modAgent, currDepth)
 			score = max(score, newScore)
 		#print score, agentNumber, 'hotdog'
 		return score
@@ -301,8 +308,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
 		for state in successorStates:
 			#score = min(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
-			modAgent =(agentNumber+1) % gameState.getNumAgents()
-			newScore = self.valueFunc(state, modAgent, currDepth - 1)
+			modAgent =(agentNumber+1)
+			newScore = self.valueFunc(state, modAgent, currDepth)
 			score = min(score, newScore)
 		#print score, agentNumber, 'chips'
 		return score
