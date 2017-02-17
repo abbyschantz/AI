@@ -519,9 +519,28 @@ def betterEvaluationFunction(currentGameState):
 	  DESCRIPTION: <write something here so we know what you did>
 	"""
 	"*** YOUR CODE HERE ***"
+	successorStates = []
 	legalActions = currentGameState.getLegalActions()
 	print "ACTION IN BETTER", legalActions
 	currPos = currentGameState.getPacmanPosition()
+	for action in legalActions:
+		currSucc = currentGameState.generatePacmanSuccessor(action)
+		ghostPositionsList = currSucc.getGhostPositions()
+		newPos = currSucc.getPacmanPosition()
+        newFood = currSucc.getFood()
+        newGhostStates = currSucc.getGhostStates()
+        newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+        newWalls = currSucc.getWalls()
+
+        ghostNextDoor = False
+        for ghostPos in ghostPositionsList:
+            if manhattanDistance(newPos, ghostPos) <= 2:
+                ghostNextDoor = True
+
+        #check wins and losses
+        if currSucc.isWin() or currSucc.isLose():
+            return currSucc.getScore()
+
 
 
 	util.raiseNotDefined()
