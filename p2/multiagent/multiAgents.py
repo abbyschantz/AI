@@ -346,7 +346,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
 
 	def valueFunc(self, gameState, agentNumber, currDepth, alpha, beta):
-		#print self.depth, agentNumber, 'pizza'
 		if agentNumber == 0:
 			currDepth = currDepth + 1
 
