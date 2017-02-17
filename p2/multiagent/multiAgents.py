@@ -267,8 +267,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
 			Returns whether or not the game state is a losing state
 		"""
 		"*** YOUR CODE HERE ***"
-		direction = self.actionDecider(gameState, self.depth)
-		return direction
+		action = self.actionDecider(gameState, self.depth)
+		return action
 		util.raiseNotDefined()
 
 	def actionDecider(self, gameState, currDepth):
@@ -346,8 +346,13 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 		"""
 		"*** YOUR CODE HERE ***"
 		#direction = self.actionDecider(gameState, self.depth)
-		action = self.valueFunc(gameState, agentNumber, currDepth, alpha, beta)[1]
+		alpha = -1*float("inf")
+		beta = float("inf")
+		currDepth = 0
+		agentNumber = gameState.getNumAgents()
+		action = self.valueFunc(gameState, agentNumber, currDepth, alpha, beta, None)[1]
 		#return direction
+		print "ACTION in getAction", action
 		return action
 
 	#def actionDecider(self, gameState, currDepth):
@@ -369,22 +374,23 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 			#return maxAction
 
 
-	def valueFunc(self, gameState, agentNumber, currDepth, alpha, beta):
+	def valueFunc(self, gameState, agentNumber, currDepth, alpha, beta, firstAction):
+		print "valueFunc FIRST ACTION", firstAction
 		#print self.depth, agentNumber, 'pizza'
 		if agentNumber == 0:
-			currDepth = currDepth - 1
+			currDepth = currDepth + 1
 
-		if gameState.isWin() or gameState.isLose() or (currDepth<=0):
+		if gameState.isWin() or gameState.isLose() or (currDepth>=self.depth):
 			#print 'hamburger', self.depth
 			return self.evaluationFunction(gameState)
 		else:
 			if agentNumber == 0:
-				return self.maxValue(gameState, agentNumber, currDepth, alpha, beta)
+				return self.maxValue(gameState, agentNumber, currDepth, alpha, beta, firstAction)
 			else:
-				return self.minValue(gameState, agentNumber, currDepth, alpha, beta)
+				return self.minValue(gameState, agentNumber, currDepth, alpha, beta, firstAction)
 	#python passes by value for strings
 
-	def maxValue(self, gameState, agentNumber, currDepth, alpha, beta):
+	def maxValue(self, gameState, agentNumber, currDepth, alpha, beta, firstAction):
 		score = -1*float("inf")
 		#legalActions = gameState.getLegalActions(agentNumber)
 		successorStates = []
@@ -395,18 +401,23 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 		for action in gameState.getLegalActions(agentNumber):
 			state = gameState.generateSuccessor(agentNumber, action)
 			print action
-			print state
 			#score = max(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
 			modAgent = (agentNumber+1) % gameState.getNumAgents()
-			(newScore, action) = (self.valueFunc(state, modAgent, currDepth, alpha, beta), action)
-			score = max(score[0], newScore[0])
+			#(newScore, action) = (self.valueFunc(state, modAgent, currDepth, alpha, beta, firstAction), action)
+			if currDepth != 0:
+				(newScore, action) = (self.valueFunc(state, modAgent, currDepth, alpha, beta, firstAction), firstAction)
+			else:
+				(newScore, action) = (self.valueFunc(state, modAgent, currDepth, alpha, beta, action), action)
+			if score < newScore:
+				(score, action) = (newScore, action)
+			#(score, action) = max(score[0], newScore[0])
 			if score >= beta:
 				return (score, action)
 			alpha = max(alpha, score)
 		#print score, agentNumber, 'hotdog'
 		return (score, action)
 
-	def minValue(self, gameState, agentNumber, currDepth, alpha, beta):
+	def minValue(self, gameState, agentNumber, currDepth, alpha, beta, firstAction):
 		score = float("inf")
 		#legalActions = gameState.getLegalActions(agentNumber)
 		successorStates = []
@@ -418,8 +429,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 			state = gameState.generateSuccessor(agentNumber, action)
 			#score = min(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
 			modAgent =(agentNumber+1) % gameState.getNumAgents()
-			(newScore, action) = (self.valueFunc(state, modAgent, currDepth, alpha, beta), action)
-			score = min(score[0], newScore[0])
+			(newScore, action) = (self.valueFunc(state, modAgent, currDepth, alpha, beta, action), firstAction)
+			score = min(score, newScore)
 			if score <= alpha:
 				return (score, action)
 			beta = min(beta, score)
@@ -440,7 +451,73 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 		  legal moves.
 		"""
 		"*** YOUR CODE HERE ***"
+		action = self.actionDecider(gameState, self.depth)
+		return action
 		util.raiseNotDefined()
+
+	def actionDecider(self, gameState, currDepth):
+		if currDepth == 0:
+			return Directions.STOP
+		else:
+			actionList = gameState.getLegalActions(0)
+			(maxAction, maxScore) = (actionList[0], -9999999)
+
+			agentNum = gameState.getNumAgents()
+			for action in actionList:
+				successor = gameState.generateSuccessor(0, action)
+				succScore = self.valueFunc(successor, (1 % agentNum), currDepth)
+				if succScore > maxScore:
+					(maxAction, maxScore) = (action, succScore)
+
+			return maxAction
+
+
+	def valueFunc(self, gameState, agentNumber, currDepth):
+		#print self.depth, agentNumber, 'pizza'
+		if agentNumber >= gameState.getNumAgents():
+			agentNumber = 0
+			currDepth = currDepth - 1
+
+		if gameState.isWin() or gameState.isLose() or (currDepth<=0):
+			#print 'hamburger', self.depth
+			return self.evaluationFunction(gameState)
+		else:
+			if agentNumber == 0:
+				return self.maxValue(gameState, agentNumber, currDepth)
+			else:
+				return self.expValue(gameState, agentNumber, currDepth)
+	#python passes by value for strings
+
+	def maxValue(self, gameState, agentNumber, currDepth):
+		score = -1*float("inf")
+		legalActions = gameState.getLegalActions(agentNumber)
+		successorStates = []
+		for action in legalActions:
+			successorStates.append(gameState.generateSuccessor(agentNumber, action))
+		for state in successorStates:
+			#score = max(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
+			modAgent = (agentNumber+1)
+			newScore = self.valueFunc(state, modAgent, currDepth)
+			score = max(score, newScore)
+		#print score, agentNumber, 'hotdog'
+		return score
+
+	def expValue(self, gameState, agentNumber, currDepth):
+		score = 0
+		legalActions = gameState.getLegalActions(agentNumber)
+		successorStates = []
+		for action in legalActions:
+			successorStates.append(gameState.generateSuccessor(agentNumber, action))
+		successorStatesLength = len(successorStates)
+		for state in successorStates:
+			#score = min(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
+			modAgent =(agentNumber+1)
+			newScore = self.valueFunc(state, modAgent, currDepth)
+			#score = min(score, newScore)
+			score += newScore
+		#print score, agentNumber, 'chips'
+		score = score/successorStatesLength
+		return score
 
 def betterEvaluationFunction(currentGameState):
 	"""
