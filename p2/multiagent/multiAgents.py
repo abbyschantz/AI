@@ -473,20 +473,17 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
 
 	def valueFunc(self, gameState, agentNumber, currDepth):
-		#print self.depth, agentNumber, 'pizza'
 		if agentNumber >= gameState.getNumAgents():
 			agentNumber = 0
 			currDepth = currDepth - 1
 
 		if gameState.isWin() or gameState.isLose() or (currDepth<=0):
-			#print 'hamburger', self.depth
 			return self.evaluationFunction(gameState)
 		else:
 			if agentNumber == 0:
 				return self.maxValue(gameState, agentNumber, currDepth)
 			else:
 				return self.expValue(gameState, agentNumber, currDepth)
-	#python passes by value for strings
 
 	def maxValue(self, gameState, agentNumber, currDepth):
 		score = -1*float("inf")
@@ -495,11 +492,9 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 		for action in legalActions:
 			successorStates.append(gameState.generateSuccessor(agentNumber, action))
 		for state in successorStates:
-			#score = max(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
 			modAgent = (agentNumber+1)
 			newScore = self.valueFunc(state, modAgent, currDepth)
 			score = max(score, newScore)
-		#print score, agentNumber, 'hotdog'
 		return score
 
 	def expValue(self, gameState, agentNumber, currDepth):
@@ -510,12 +505,9 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 			successorStates.append(gameState.generateSuccessor(agentNumber, action))
 		successorStatesLength = len(successorStates)
 		for state in successorStates:
-			#score = min(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
 			modAgent =(agentNumber+1)
 			newScore = self.valueFunc(state, modAgent, currDepth)
-			#score = min(score, newScore)
 			score += newScore
-		#print score, agentNumber, 'chips'
 		score = score/successorStatesLength
 		return score
 
@@ -527,6 +519,11 @@ def betterEvaluationFunction(currentGameState):
 	  DESCRIPTION: <write something here so we know what you did>
 	"""
 	"*** YOUR CODE HERE ***"
+	legalActions = currentGameState.getLegalActions()
+	print "ACTION IN BETTER", legalActions
+	currPos = currentGameState.getPacmanPosition()
+
+
 	util.raiseNotDefined()
 
 # Abbreviation
