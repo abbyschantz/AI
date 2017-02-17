@@ -289,20 +289,17 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
 
 	def valueFunc(self, gameState, agentNumber, currDepth):
-		#print self.depth, agentNumber, 'pizza'
 		if agentNumber >= gameState.getNumAgents():
 			agentNumber = 0
 			currDepth = currDepth - 1
 
 		if gameState.isWin() or gameState.isLose() or (currDepth<=0):
-			#print 'hamburger', self.depth
 			return self.evaluationFunction(gameState)
 		else:
 			if agentNumber == 0:
 				return self.maxValue(gameState, agentNumber, currDepth)
 			else:
 				return self.minValue(gameState, agentNumber, currDepth)
-	#python passes by value for strings
 
 	def maxValue(self, gameState, agentNumber, currDepth):
 		score = -1*float("inf")
@@ -312,11 +309,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
 			successorStates.append(gameState.generateSuccessor(agentNumber, action))
 
 		for state in successorStates:
-			#score = max(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
 			modAgent = (agentNumber+1)
 			newScore = self.valueFunc(state, modAgent, currDepth)
 			score = max(score, newScore)
-		#print score, agentNumber, 'hotdog'
 		return score
 
 	def minValue(self, gameState, agentNumber, currDepth):
@@ -327,11 +322,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
 			successorStates.append(gameState.generateSuccessor(agentNumber, action))
 
 		for state in successorStates:
-			#score = min(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
 			modAgent =(agentNumber+1)
 			newScore = self.valueFunc(state, modAgent, currDepth)
 			score = min(score, newScore)
-		#print score, agentNumber, 'chips'
 		return score
 
 
@@ -345,36 +338,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 		  Returns the minimax action using self.depth and self.evaluationFunction
 		"""
 		"*** YOUR CODE HERE ***"
-		#direction = self.actionDecider(gameState, self.depth)
-		#alpha = -1*float("inf")
-		#beta = float("inf")
-		#score = -1*float("inf")
-		#currDepth = 0
-		#agentNumber = gameState.getNumAgents()
-		#actionList = gameState.getLegalActions(0)
-		#print "actionList", actionList
-		#action = Directions.STOP
-		#print "action for directions.STOP", action
-		#for currAction in actionList:
-			#print "in getAction in currAction loop", currAction
-			#successor = gameState.generateSuccessor(0, currAction)
-			#print "successor in getAction", successor
-			#currScore = score
-			#score = self.valueFunc(successor, agentNumber, self.depth, alpha, beta)
-			#if score > currScore:
-				#action = currAction
-			#if score >= beta:
-				#return action
-			#alpha = max(alpha, score)
-		#return action
 
-		#action = self.valueFunc(gameState, agentNumber, currDepth, alpha, beta, None)[1]
-		#return direction
-		#print "ACTION in getAction", action
-		#return action
 		alpha = -1*float("inf")
 		beta = float("inf")
-		print "in first function"
 		action = self.valueFunc(gameState, 0, -1, alpha, beta)[1]
 		return action
 
@@ -388,69 +354,38 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 			return (self.evaluationFunction(gameState), Directions.STOP)
 		else:
 			if agentNumber == 0:
-				print "in agent == 0"
 				return self.maxValue(gameState, agentNumber, currDepth, alpha, beta)
 			else:
-				print "going to minValue"
 				return self.minValue(gameState, agentNumber, currDepth, alpha, beta)
-	#python passes by value for strings
 
 	def maxValue(self, gameState, agentNumber, currDepth, alpha, beta):
 		score = -1*float("inf")
-		#legalActions = gameState.getLegalActions(agentNumber)
-		#successorStates = []
-		#for action in legalActions:
-			#successorStates.append(gameState.generateSuccessor(agentNumber, action))
-
-		#for state in successorStates:
 		bestAction = Directions.STOP
 		for action in gameState.getLegalActions(agentNumber):
 			state = gameState.generateSuccessor(agentNumber, action)
-			#score = max(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
 			modAgent = (agentNumber+1) % gameState.getNumAgents()
 			newScore = max(score, self.valueFunc(state, modAgent, currDepth, alpha, beta)[0])
 			if newScore > score:
 				bestAction = action
 			score = newScore
-			#modAgent = (agentNumber+1) % gameState.getNumAgents()
-			#(newScore, action) = (self.valueFunc(state, modAgent, currDepth, alpha, beta, firstAction), action)
-			#if currDepth != 0:
-				#(newScore, action) = (self.valueFunc(state, modAgent, currDepth, alpha, beta), action)
-			#else:
-				#(newScore, action) = (self.valueFunc(state, modAgent, currDepth, alpha, beta), action)
-			#if score < newScore:
-				#(score, action) = (newScore, action)
-			#(score, action) = max(score[0], newScore[0])
 			if newScore > beta:
 				return (newScore, bestAction)
 			alpha = max(alpha, newScore)
-		print newScore, bestAction
 		return (newScore, bestAction)
 
 	def minValue(self, gameState, agentNumber, currDepth, alpha, beta):
 		score = float("inf")
 		bestAction = Directions.STOP
-		#legalActions = gameState.getLegalActions(agentNumber)
-		#successorStates = []
-		#for action in legalActions:
-			#successorStates.append(gameState.generateSuccessor(agentNumber, action))
-
-		#for state in successorStates:
 		for action in gameState.getLegalActions(agentNumber):
 			state = gameState.generateSuccessor(agentNumber, action)
-			#score = min(score, self.valueFunc(state, (agentNumber+1) % gameState.getNumAgents))
 			modAgent =(agentNumber+1) % gameState.getNumAgents()
-			#(newScore, action) = (self.valueFunc(state, modAgent, currDepth, alpha, beta), firstAction)
 			newScore = min(score, self.valueFunc(state, modAgent, currDepth, alpha, beta)[0])
-			#score = min(score, newScore)
 			if newScore < score:
 				bestAction = action
 			score = newScore
 			if newScore < alpha:
 				return (newScore, bestAction)
 			beta = min(beta, newScore)
-		#print score, agentNumber, 'chips'
-		print "minValue ", newScore, bestAction
 		return (newScore, bestAction)
 
 
