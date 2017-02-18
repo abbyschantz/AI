@@ -113,44 +113,6 @@ class ReflexAgent(Agent):
             stateChange = stateChange - 10
         return stateChange
 
-        """old code
-        if successorGameState.isWin() or successorGameState.isLose():
-            return successorGameState.getScore()
-
-        foodList = newFood.asList()
-        capsuleList = currentGameState.getCapsules()
-        foodList.extend(capsuleList)
-        foodPathList = self.breadthFirstSearch(successorGameState, foodList)
-
-        ghostPositionsList = successorGameState.getGhostPositions()
-        print ghostPositionsList
-        ghostPathList = []
-        if(newScaredTimes[0] == 0):
-            ghostPathList = self.breadthFirstSearch(successorGameState, ghostPositionsList)
-
-        stateChange = successorGameState.getScore() - currentGameState.getScore()
-
-        if successorGameState.getPacmanPosition() in capsuleList:
-            return stateChange + 50
-
-        ghostNextDoor = False
-        if manhattanDistance(newPos, ghostPositionsList[0]) <= 3:
-            ghostNextDoor = True
-
-        if action == Directions.STOP:
-            stateChange = stateChange - 10
-
-        if ghostNextDoor:
-            stateChange = stateChange - 250
-
-        if newPos in foodPathList:
-            stateChange = stateChange + (10/len(foodPathList))
-        else:
-            #deviate from path, when ghost is within 5
-            stateChange = stateChange - 20
-
-        return stateChange
-        """
     def breadthFirstSearch(self, gameState, goalList):
         """Search the shallowest nodes in the search tree first."""
         "*** YOUR CODE HERE ***"
@@ -462,38 +424,164 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 		return score
 
 def betterEvaluationFunction(currentGameState):
-	"""
-	  Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
-	  evaluation function (question 5).
+    """
+      Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
+      evaluation function (question 5).
 
-	  DESCRIPTION: <write something here so we know what you did>
-	"""
-	"*** YOUR CODE HERE ***"
-	#successorStates = []
-	#legalActions = currentGameState.getLegalActions()
-	#print "ACTION IN BETTER", legalActions
-	#currPos = currentGameState.getPacmanPosition()
-	#for action in legalActions:
-		#currSucc = currentGameState.generatePacmanSuccessor(action)
-		#ghostPositionsList = currSucc.getGhostPositions()
-		#newPos = currSucc.getPacmanPosition()
-        #newFood = currSucc.getFood()
-        #newGhostStates = currSucc.getGhostStates()
-        #newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
-        #newWalls = currSucc.getWalls()
+      DESCRIPTION: Rewards getting closer to using reciprocal to nearest food dot using bfs length of path.
+	  Punishes for getting within 2 of ghost if scaredTimes less than or equal to 5
+	  Punishes for staying in area with 3 walls around it when the scaredTime on the ghost isn't "fresh" (so it doesn't get stuck with only one way out)
+    """
+    "*** YOUR CODE HERE ***"
+    if currentGameState.isLose() or currentGameState.isWin():
+        return currentGameState.getScore()
 
-        #ghostNextDoor = False
-        #for ghostPos in ghostPositionsList:
-            #if manhattanDistance(newPos, ghostPos) <= 2:
-                #ghostNextDoor = True
+    stateScore = currentGameState.getScore()
 
-        #check wins and losses
-        #if currSucc.isWin() or currSucc.isLose():
-            #return currSucc.getScore()
+    walls = currentGameState.getWalls()
+    wallsList = walls.asList()
+    currPos = currentGameState.getPacmanPosition()
+    (currX, currY) = currPos
+    currCapsules = currentGameState.getCapsules()
+    currFood = currentGameState.getFood()
+    foodList = currFood.asList()
+    foodList.extend(currCapsules)
+    ghostStates = currentGameState.getGhostStates()
+    scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
+    ghostPositionsList = currentGameState.getGhostPositions()
+
+    (foodLoc, nearManhFoodDist) = ((0,0), float('inf'))
+
+    ghostDist = breadthFirstDepthLimitedSearch(currentGameState, ghostPositionsList)
+
+    if ghostDist <= 2 and scaredTimes[0] < 5:
+        stateScore = stateScore - 250
+
+    foodPathList = breadthFirstSearch(currentGameState, foodList)
+    stateScore = stateScore + 20/len(foodPathList)
+    wallsCount = 0
+    wallsTestList = [(currX+1, currY), (currX-1, currY), (currX, currY+1), (currX, currY-1)]
+    for wallTest in wallsTestList:
+        if wallTest in wallsList:
+            wallsCount = wallsCount + 1
+
+    if wallsCount == 3 and scaredTimes[0] <= 35 and scaredTimes[0] >= 0:
+        stateScore = stateScore - 2
+
+    return stateScore
+    util.raiseNotDefined()
+
+def breadthFirstSearch(gameState, goalList):
+    """Search the shallowest nodes in the search tree first."""
+    "*** YOUR CODE HERE ***"
+    queue = util.Queue()
+    return generalizedSearch(gameState, queue, goalList)
+    util.raiseNotDefined()
+
+def generalizedSearch(gameState, dataStruc, goalList):
+    goalSet = set(goalList)
+
+    wallsMatr = gameState.getWalls()
+    wallsList = wallsMatr.asList()
+    closed = set(wallsList)
+
+    startList = []
+    startList.append(gameState.getPacmanPosition())
+    dataStruc.push(startList)
 
 
+    while not dataStruc.isEmpty():
+        """currAndActions[(currx, curry), (x1,y1), (x2, y2), ..., (xn, yn)]"""
+        currAndActions = dataStruc.pop()
 
-	util.raiseNotDefined()
+        (currx, curry) = currAndActions.pop(0)
+
+
+        if (currx, curry) in goalSet:
+            currAndActions.append((currx, curry))
+            return currAndActions
+
+        if not ((currx,curry) in closed):
+            closed.add((currx, curry))
+
+            succList = []
+            #adds immediate points around current point
+            if (currx + 1) < wallsMatr.width and ((currx + 1), curry) not in closed:
+                new = (currx+1, curry)
+                succList.append(new)
+            if (currx - 1) >= 0 and ((currx - 1), curry) not in closed:
+                new = (currx-1, curry)
+                succList.append(new)
+            if (curry + 1) < wallsMatr.height and (currx, (curry + 1)) not in closed:
+                new = (currx, curry+1)
+                succList.append(new)
+            if (curry - 1) >= 0 and (currx, (curry - 1)) not in closed:
+                new = (currx, curry-1)
+                succList.append(new)
+
+            for (xn, yn) in succList:
+                newList = []
+                newList.append((xn,yn))
+                currAndActions.append((currx,curry))
+                newList.extend(currAndActions)
+                dataStruc.push(newList)
+
+    util.raiseNotDefined()
+
+def breadthFirstDepthLimitedSearch(gameState, goalList):
+    queue = util.Queue()
+    return generalizedDepthLimitedSearch(gameState, queue, goalList)
+    util.raiseNotDefined()
+
+def generalizedDepthLimitedSearch(gameState, dataStruc, goalList):
+    goalSet = set(goalList)
+
+    wallsMatr = gameState.getWalls()
+    wallsList = wallsMatr.asList()
+    closed = set(wallsList)
+
+    startList = []
+    startList.append(gameState.getPacmanPosition())
+    dataStruc.push((startList, 0))
+
+
+    while not dataStruc.isEmpty():
+        """currAndActions[(currx, curry), (x1,y1), (x2, y2), ..., (xn, yn)]"""
+        (currAndActions, currDepth) = dataStruc.pop()
+        (currx, curry) = currAndActions.pop(0)
+
+        #when ghost isn't within 2 actions
+        if currDepth >= 3:
+            return 99999
+
+        if (currx, curry) in goalSet:
+            currAndActions.append((currx, curry))
+            return currDepth
+
+        if not ((currx,curry) in closed):
+            closed.add((currx, curry))
+
+            succList = []
+            #adds immediate points around current point
+            if (currx + 1) < wallsMatr.width and ((currx + 1), curry) not in closed:
+                new = (currx+1, curry)
+                succList.append(new)
+            if (currx - 1) >= 0 and ((currx - 1), curry) not in closed:
+                new = (currx-1, curry)
+                succList.append(new)
+            if (curry + 1) < wallsMatr.height and (currx, (curry + 1)) not in closed:
+                new = (currx, curry+1)
+                succList.append(new)
+            if (curry - 1) >= 0 and (currx, (curry - 1)) not in closed:
+                new = (currx, curry-1)
+                succList.append(new)
+
+            for (xn, yn) in succList:
+                newList = []
+                newList.append((xn,yn))
+                currAndActions.append((currx,curry))
+                newList.extend(currAndActions)
+                dataStruc.push((newList, currDepth + 1))
 
 # Abbreviation
 better = betterEvaluationFunction
