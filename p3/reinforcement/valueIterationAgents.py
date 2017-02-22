@@ -77,7 +77,17 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        value = 0
+        if self.mdp.isTerminal():
+          return getReward(state, action, state)
+          
+        for nextStateAndProbs in self.mdp.getTransitionStatesAndProbs(state, action):
+          currNextStateProb = nextStateAndProbs[1]
+          currNextState = nextStateAndProbs[0]
+          currReward = self.mdp.getReward(state, action, currNextState)
+          print currReward
+        return value
 
     def computeActionFromValues(self, state):
         """
@@ -87,9 +97,22 @@ class ValueIterationAgent(ValueEstimationAgent):
           You may break ties any way you see fit.  Note that if
           there are no legal actions, which is the case at the
           terminal state, you should return None.
+
+          HINT: Use the util.Counter class in util.py, 
+          which is a dictionary with a default value of zero. 
+          Methods such as totalCount should simplify your code. 
+          However, be careful with argMax: 
+          the actual argmax you want may be a key not in the counter!
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        #values (initialized) prints {'TERMINAL_STATE': 0} {(0, 0): 0, 'TERMINAL_STATE': 0}
+        values = self.values
+        return self.values
+        #case for when a state has no available actions in an MDP 
+
+
+        #util.raiseNotDefined()
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
