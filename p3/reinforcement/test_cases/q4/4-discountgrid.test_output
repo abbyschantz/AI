@@ -36,7 +36,7 @@ Q-Values at iteration 0 for action exit are NOT correct.
  q_values_k_0_action_exit: """
            illegal      illegal      illegal      illegal      illegal
            illegal   __________      illegal      illegal      illegal
-           illegal   __________       1.0000   __________      10.0000
+           illegal   __________       0.0000   __________       0.0000
            illegal      illegal      illegal      illegal      illegal
             0.0000       0.0000       0.0000       0.0000       0.0000
 """

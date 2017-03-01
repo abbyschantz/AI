@@ -22,7 +22,7 @@ Q-Values at iteration 0 for action east are correct.
 Q-Values at iteration 0 for action exit are NOT correct.
    Student solution:
  q_values_k_0_action_exit: """
-           10.0000      illegal       0.0000
+            0.0000      illegal       0.0000
 """
 
 

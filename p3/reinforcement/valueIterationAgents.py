@@ -64,15 +64,18 @@ class ValueIterationAgent(ValueEstimationAgent):
         "*** YOUR CODE HERE ***"
         #loop through each iteration
         for i in range(self.iterations):
+          counter = util.Counter()
           #loop through each state in the states of that interaction
           for state in self.mdp.getStates():
+
+            if self.mdp.isTerminal(state):
+              continue
             #initialize utility and rewards to 0
-            utility = 0
-            reward = 0
+            maxValue = float("inf")*-1
             #loop through each action of the possible actions for that state 
             for action in self.mdp.getPossibleActions(state):
               #set utility for this specific action to 0 
-              currUtility = 0
+              currValue = 0
               #loop through each of the state, prob pairs for the transition states
               for nextStateAndProb in self.mdp.getTransitionStatesAndProbs(state, action):
                 nextState = nextStateAndProb[0]
@@ -80,13 +83,16 @@ class ValueIterationAgent(ValueEstimationAgent):
                 #get the reward for this current state
                 currReward = self.mdp.getReward(state, action, nextState)
                 #sum current utility with  the prob times the value of that state
-                currUtility += nextProb*self.values[nextState]
+                currUtility = nextProb*self.values[nextState]
               #if new utility is better, set that to utility and take its reward
-              if currUtility >= utility:
-                utility = currUtility
-                reward = currReward
+                currValue += nextProb * (currReward + (self.discount * self.values[nextState]))
+              if currValue > maxValue:
+                maxValue = currValue
+              
             #set value of the state to be the function (reward + (utility * gamma))
-            self.values[state] = reward + utility*self.discount
+            counter[state] += maxValue
+          self.values = counter
+
 
 
     def getValue(self, state):
@@ -119,10 +125,12 @@ class ValueIterationAgent(ValueEstimationAgent):
           #currValue = self.values[currNextState] * currNextStateProb
           
           #set current value to be the prob times the value of the state 
-          currValue = currNextStateProb * self.values[currNextState]
+
+          currReward = self.mdp.getReward(state, action, currNextState)
+          currValue = currNextStateProb * (currReward + (self.discount * self.values[currNextState]))
           #if this new value is greater than our old, set value to the new value
-          if currValue >= value:
-            value = currValue
+          
+          value += currValue
         return value
         
         #gamma = self.discount
@@ -155,7 +163,7 @@ class ValueIterationAgent(ValueEstimationAgent):
           return None
 
         #initialize at 0 and None
-        value = 0
+        value = -1*float("inf")
         action = None
 
         #loop through each action of all possible actions for the given state
