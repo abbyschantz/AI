@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -18,7 +18,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -72,9 +72,9 @@ class ValueIterationAgent(ValueEstimationAgent):
               continue
             #initialize utility and rewards to 0
             maxValue = float("inf")*-1
-            #loop through each action of the possible actions for that state 
+            #loop through each action of the possible actions for that state
             for action in self.mdp.getPossibleActions(state):
-              #set utility for this specific action to 0 
+              #set utility for this specific action to 0
               currValue = 0
               #loop through each of the state, prob pairs for the transition states
               for nextStateAndProb in self.mdp.getTransitionStatesAndProbs(state, action):
@@ -88,7 +88,7 @@ class ValueIterationAgent(ValueEstimationAgent):
                 currValue += nextProb * (currReward + (self.discount * self.values[nextState]))
               if currValue > maxValue:
                 maxValue = currValue
-              
+
             #set value of the state to be the function (reward + (utility * gamma))
             counter[state] += maxValue
           self.values = counter
@@ -108,8 +108,8 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        
-        
+
+
         #initialze at 0
         value = 0
         #if self.mdp.isTerminal():
@@ -119,20 +119,20 @@ class ValueIterationAgent(ValueEstimationAgent):
         for nextStateAndProbs in self.mdp.getTransitionStatesAndProbs(state, action):
           currNextStateProb = nextStateAndProbs[1]
           currNextState = nextStateAndProbs[0]
-          
+
           #currReward = self.mdp.getReward(state, action, currNextState)
-          
+
           #currValue = self.values[currNextState] * currNextStateProb
-          
-          #set current value to be the prob times the value of the state 
+
+          #set current value to be the prob times the value of the state
 
           currReward = self.mdp.getReward(state, action, currNextState)
           currValue = currNextStateProb * (currReward + (self.discount * self.values[currNextState]))
           #if this new value is greater than our old, set value to the new value
-          
+
           value += currValue
         return value
-        
+
         #gamma = self.discount
 
 
@@ -146,10 +146,10 @@ class ValueIterationAgent(ValueEstimationAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return None.
 
-          HINT: Use the util.Counter class in util.py, 
-          which is a dictionary with a default value of zero. 
-          Methods such as totalCount should simplify your code. 
-          However, be careful with argMax: 
+          HINT: Use the util.Counter class in util.py,
+          which is a dictionary with a default value of zero.
+          Methods such as totalCount should simplify your code.
+          However, be careful with argMax:
           the actual argmax you want may be a key not in the counter!
         """
         "*** YOUR CODE HERE ***"
@@ -157,7 +157,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         #values (initialized) prints {'TERMINAL_STATE': 0} {(0, 0): 0, 'TERMINAL_STATE': 0}
         #values = self.values
         #return self.values
-        #case for when a state has no available actions in an MDP 
+        #case for when a state has no available actions in an MDP
         if len(self.mdp.getPossibleActions(state)) == 0:
           print "in base case, no possible actions"
           return None
@@ -168,16 +168,13 @@ class ValueIterationAgent(ValueEstimationAgent):
 
         #loop through each action of all possible actions for the given state
         for currAction in self.mdp.getPossibleActions(state):
-          print "currAction is", currAction
           #set QValue using our computeQValueFromValues function
           QValue = self.computeQValueFromValues(state, currAction)
-          print "QValue is", QValue
-          #If that new value is greater than our previous value, 
+          #If that new value is greater than our previous value,
           #we set value to this new value and action to that action
           if QValue >= value:
             value = QValue
             action = currAction
-        print "best action is", action
         return action
 
         #util.raiseNotDefined()
@@ -241,4 +238,3 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
 
     def runValueIteration(self):
         "*** YOUR CODE HERE ***"
-
