@@ -191,7 +191,6 @@ class AsynchronousValueIterationAgent(ValueIterationAgent):
 				"*** YOUR CODE HERE ***"
 				states = self.mdp.getStates()
 				statesLen = len(states)
-				i = 0
 				currStateIteration = 0
 				for i in range(self.iterations):
 
@@ -244,3 +243,114 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
 
 		def runValueIteration(self):
 				"*** YOUR CODE HERE ***"
+				preds = {}
+				for state in self.mdp.getStates():
+					if self.mdp.isTerminal(state):
+						continue
+					for action in self.mdp.getPossibleActions(state):
+						for nextStateAndProb in self.mdp.getTransitionStatesAndProbs(state, action):
+							nextState = nextStateAndProb[0]
+							nextProb = nextStateAndProb[1]
+
+							if nextProb != 0:
+								preds.setdefault(nextState, [])
+								if not state in preds.get(nextState, None):
+									preds[nextState].append(state)
+				#print "preds are ", preds
+				pq = util.PriorityQueue()
+				for state in self.mdp.getStates():
+					if self.mdp.isTerminal(state):
+						continue
+					maxValue = float("-inf")
+
+					for action in self.mdp.getPossibleActions(state):
+						currValue = 0
+						for nextStateAndProb in self.mdp.getTransitionStatesAndProbs(state, action):
+							nextState = nextStateAndProb[0]
+							nextProb = nextStateAndProb[1]
+							#print "before self.values[currState] is ", self.values[currState]
+							currReward = self.mdp.getReward(state, action, nextState)
+							currValue += nextProb * (currReward + (self.discount * self.values[nextState]))
+						if currValue > maxValue:
+							maxValue = currValue
+					diff = abs(self.values[state]-maxValue)
+					pq.push(state, -diff)
+				for i in range(self.iterations):
+					if pq.isEmpty():
+						return
+					s = pq.pop()
+					maxValue = float("-inf")
+
+					for action in self.mdp.getPossibleActions(s):
+						currValue = 0
+						for nextStateAndProb in self.mdp.getTransitionStatesAndProbs(s, action):
+							nextState = nextStateAndProb[0]
+							nextProb = nextStateAndProb[1]
+							#print "before self.values[currState] is ", self.values[currState]
+							currReward = self.mdp.getReward(s, action, nextState)
+							currValue += nextProb * (currReward + (self.discount * self.values[nextState]))
+							#if self.values[currState] < currValue:
+								#self.values[currState] = currValue
+						if currValue > maxValue:
+							maxValue = currValue
+					self.values[s] = maxValue
+					for pred in preds[s]:
+						maxValue = float("-inf")
+
+						for action in self.mdp.getPossibleActions(pred):
+							currValue = 0
+							for nextStateAndProb in self.mdp.getTransitionStatesAndProbs(pred, action):
+								nextState = nextStateAndProb[0]
+								nextProb = nextStateAndProb[1]
+								#print "before self.values[currState] is ", self.values[currState]
+								currReward = self.mdp.getReward(pred, action, nextState)
+								currValue += nextProb * (currReward + (self.discount * self.values[nextState]))
+							if currValue > maxValue:
+								maxValue = currValue
+						diff = abs(self.values[pred]-maxValue)
+						if diff > self.theta:
+							pq.update(pred, -diff)
+
+
+
+				"""
+				for i in range(self.iterations):
+					for state in self.mdp.getStates():
+
+						if self.mdp.isTerminal(state):
+							continue
+
+						maxValue = float("-inf")
+
+						for action in self.mdp.getPossibleActions(state):
+							currValue = 0
+							for nextStateAndProb in self.mdp.getTransitionStatesAndProbs(state, action):
+								nextState = nextStateAndProb[0]
+								nextProb = nextStateAndProb[1]
+								#print "before self.values[currState] is ", self.values[currState]
+								currReward = self.mdp.getReward(state, action, nextState)
+								currValue += nextProb * (currReward + (self.discount * self.values[nextState]))
+							if currValue > maxValue:
+								maxValue = currValue
+						diff = abs(self.values[state]-maxValue)
+						pq.push(state, -diff)
+					if i != self.iterations:
+						if pq.isEmpty():
+							return
+						s = pq.pop()
+						if not self.mdp.isTerminal(s):
+							self.values[s] = 0
+				"""
+
+
+
+
+
+
+
+
+
+
+
+
+
