@@ -313,36 +313,6 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
 
 
 
-				"""
-				for i in range(self.iterations):
-					for state in self.mdp.getStates():
-
-						if self.mdp.isTerminal(state):
-							continue
-
-						maxValue = float("-inf")
-
-						for action in self.mdp.getPossibleActions(state):
-							currValue = 0
-							for nextStateAndProb in self.mdp.getTransitionStatesAndProbs(state, action):
-								nextState = nextStateAndProb[0]
-								nextProb = nextStateAndProb[1]
-								#print "before self.values[currState] is ", self.values[currState]
-								currReward = self.mdp.getReward(state, action, nextState)
-								currValue += nextProb * (currReward + (self.discount * self.values[nextState]))
-							if currValue > maxValue:
-								maxValue = currValue
-						diff = abs(self.values[state]-maxValue)
-						pq.push(state, -diff)
-					if i != self.iterations:
-						if pq.isEmpty():
-							return
-						s = pq.pop()
-						if not self.mdp.isTerminal(s):
-							self.values[s] = 0
-				"""
-
-
 
 
 
