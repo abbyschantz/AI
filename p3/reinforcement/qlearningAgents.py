@@ -53,13 +53,11 @@ class QLearningAgent(ReinforcementAgent):
           or the Q node value otherwise
         """
         "*** YOUR CODE HERE ***"
-        print "qvalues"
         if (state,action) in self.positionQVals:
             qVal = self.positionQVals[(state,action)]
-            print "in getQValue, qvalue is", qVal
             return qVal
-        print "i missed the loop in getQValue so I return 0.0"
-        return 0.0
+        self.positionQVals[(state, action)] = 0.0
+        return self.positionQVals[(state, action)]
 
 
     def computeValueFromQValues(self, state):
@@ -74,7 +72,7 @@ class QLearningAgent(ReinforcementAgent):
         if len(legalActions) == 0:
             return 0.0
 
-        maxVal = float('-inf')
+        maxVal = -9999999999999999999999999
         for action in legalActions:
             currQ = self.getQValue(state, action)
             if currQ > maxVal:
@@ -91,27 +89,28 @@ class QLearningAgent(ReinforcementAgent):
         """
         "*** YOUR CODE HERE ***"
 
-        """
         legalActions = self.getLegalActions(state)
         if len(legalActions) == 0:
             return None
 
         choices = []
-        startAction = (-1*float('inf'), None)
+        startAction = (self.getQValue(state, legalActions[0]), legalActions[0])
         choices.append(startAction)
 
         for action in legalActions:
             currQ = self.getQValue(state, action)
-            maxVal = choices[0]
+            (maxVal, maxAction) = choices[0]
 
             if currQ > maxVal:
                 choices = []
-                choices.append(currQ, action)
+                choices.append((currQ, action))
             elif currQ == maxVal:
-                choices.append(currQ, action)
+                choices.append((currQ, action))
+
 
         (maxVal, maxAction) = random.choice(choices)
         return maxAction
+
         """
         legalActions = self.getLegalActions(state)
         if len(legalActions) == 0:
@@ -122,7 +121,7 @@ class QLearningAgent(ReinforcementAgent):
           if currQValue > maxValue[0]:
             maxValue = (currQValue, action)
         return maxValue[1]
-            
+        """
 
 
 
@@ -169,19 +168,10 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
         "*** YOUR CODE HERE ***"
-        """
-        statesAndProbs = self.mdp.getTransitionStatesAndProbs(state, action)
-        newQVal = 0.0
-        for (nextState,prob) in statesAndProbs:
-            maxNextQ = self.computeValueFromQValues(nextState)
-            newQVal += prob*(reward + self.discount*maxNextQ)
-
-        return newQVal
-        """
-        #newQValue = float("-inf")
-        currQvalue = self.getQValue(state, action)
-        currQvalue += self.epsilon * (reward + (self.discount * self.getQValue(nextState, action)))
-
+        sample = reward + self.discount*self.computeValueFromQValues(nextState)
+        newQ = (1-self.alpha)*self.getQValue(state, action) + self.alpha*sample
+        self.positionQVals[(state, action)] = newQ
+        return newQ
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
