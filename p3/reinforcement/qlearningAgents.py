@@ -43,8 +43,6 @@ class QLearningAgent(ReinforcementAgent):
         ReinforcementAgent.__init__(self, **args)
         "*** YOUR CODE HERE ***"
         self.positionQVals = {}
-        #key: (state, action)
-        #value: qVal (double)
 
     def getQValue(self, state, action):
         """
@@ -111,18 +109,6 @@ class QLearningAgent(ReinforcementAgent):
         (maxVal, maxAction) = random.choice(choices)
         return maxAction
 
-        """
-        legalActions = self.getLegalActions(state)
-        if len(legalActions) == 0:
-          return None
-        maxValue = (float("-inf"), None)
-        for action in legalActions:
-          currQValue = self.getQValue(state, action)
-          if currQValue > maxValue[0]:
-            maxValue = (currQValue, action)
-        return maxValue[1]
-        """
-
 
 
     def getAction(self, state):
@@ -136,19 +122,7 @@ class QLearningAgent(ReinforcementAgent):
           HINT: You might want to use util.flipCoin(prob)
           HINT: To pick randomly from a list, use random.choice(list)
         """
-        """
-        # Pick Action
-        legalActions = self.getLegalActions(state)
-        action = None
-        "*** YOUR CODE HERE ***"
-        if random.random() < self.epsilon:
-            return random.choice(legalActions)
 
-        bestAction = self.computeActionFromQValues(state)
-        return bestAction
-
-        return action
-        """
         legalActions = self.getLegalActions(state)
         if len(legalActions) == 0:
           return None
@@ -234,7 +208,6 @@ class ApproximateQAgent(PacmanQAgent):
         """
         "*** YOUR CODE HERE ***"
         features = self.featExtractor.getFeatures(state, action)
-        #print features
         featuresList = features.items()
         qfunc = 0
         for name, value in featuresList:
@@ -265,6 +238,4 @@ class ApproximateQAgent(PacmanQAgent):
             # you might want to print your weights here for debugging
             "*** YOUR CODE HERE ***"
             weightsList = self.weights.items()
-            print "weightsList", weightsList
-            for key, value in weightsList:
-              print key, value
+
