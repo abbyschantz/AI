@@ -96,21 +96,30 @@ def constructBayesNet(gameState):
     variableDomainsDict = {}
 
     "*** YOUR CODE HERE ***"
-    edges.append((X_POS_VAR, FOOD_HOUSE_VAR))
-    edges.append((X_POS_VAR, GHOST_HOUSE_VAR))
-    edges.append((Y_POS_VAR, FOOD_HOUSE_VAR))
-    edges.append((Y_POS_VAR, GHOST_HOUSE_VAR))
+
     for housePos in gameState.getPossibleHouses():
             for obsPos in gameState.getHouseWalls(housePos):
                 obsVar = OBS_VAR_TEMPLATE % obsPos
                 obsVars.append(obsVar)
                 edges.append((FOOD_HOUSE_VAR, obsVar))
                 edges.append((GHOST_HOUSE_VAR, obsVar))
-    
 
+    edges.append((X_POS_VAR, FOOD_HOUSE_VAR))
+    edges.append((X_POS_VAR, GHOST_HOUSE_VAR))
+    edges.append((Y_POS_VAR, FOOD_HOUSE_VAR))
+    edges.append((Y_POS_VAR, GHOST_HOUSE_VAR))
+
+
+    for housePos in gameState.getPossibleHouses():
+            for obsPos in gameState.getHouseWalls(housePos):
+                obsVar = OBS_VAR_TEMPLATE % obsPos
+                variableDomainsDict[obsVar] = [BLUE_OBS_VAL, RED_OBS_VAL, NO_OBS_VAL]
+    variableDomainsDict[X_POS_VAR] = [FOOD_LEFT_VAL, GHOST_LEFT_VAL]
+    variableDomainsDict[Y_POS_VAR] = [BOTH_TOP_VAL, LEFT_BOTTOM_VAL, BOTH_TOP_VAL, BOTH_BOTTOM_VAL]
+    variableDomainsDict[FOOD_HOUSE_VAR] = [TOP_LEFT_VAL, TOP_RIGHT_VAL, BOTTOM_LEFT_VAL, BOTTOM_RIGHT_VAL]
+    variableDomainsDict[GHOST_HOUSE_VAR] = [TOP_LEFT_VAL, TOP_RIGHT_VAL, BOTTOM_LEFT_VAL, BOTTOM_RIGHT_VAL]
 
     variables = [X_POS_VAR, Y_POS_VAR] + HOUSE_VARS + obsVars
-    print "variabels are", variables
     net = bn.constructEmptyBayesNet(variables, edges, variableDomainsDict)
     return net, obsVars
 
@@ -135,11 +144,31 @@ def fillYCPT(bayesNet, gameState):
     See the definition of `fillXCPT` above for an example of how to do this.
     You can use the PROB_* constants imported from layout rather than writing
     probabilities down by hand.
+
+    Y_POS_VAR = "yPos"
+    BOTH_TOP_VAL = "bothTop"
+    BOTH_BOTTOM_VAL = "bothBottom"
+    LEFT_TOP_VAL = "leftTop"
+    LEFT_BOTTOM_VAL = "leftBottom"
+
+    TOP_LEFT_VAL = "topLeft"
+    TOP_RIGHT_VAL = "topRight"
+    BOTTOM_LEFT_VAL = "bottomLeft"
+    BOTTOM_RIGHT_VAL = "bottomRight"
+
+    PROB_BOTH_TOP, PROB_BOTH_BOTTOM, PROB_ONLY_LEFT_TOP, \
+    PROB_ONLY_LEFT_BOTTOM, PROB_FOOD_RED, PROB_GHOST_RED
     """
+
 
     yFactor = bn.Factor([Y_POS_VAR], [], bayesNet.variableDomainsDict())
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    yFactor.setProbability({Y_POS_VAR: BOTH_TOP_VAL}, PROB_BOTH_TOP)
+    yFactor.setProbability({Y_POS_VAR: BOTH_BOTTOM_VAL}, PROB_BOTH_BOTTOM)
+    yFactor.setProbability({Y_POS_VAR: LEFT_TOP_VAL}, PROB_ONLY_LEFT_TOP)
+    yFactor.setProbability({Y_POS_VAR: LEFT_BOTTOM_VAL}, PROB_ONLY_LEFT_BOTTOM)
+
+
     bayesNet.setCPT(Y_POS_VAR, yFactor)
 
 def fillHouseCPT(bayesNet, gameState):
@@ -199,12 +228,24 @@ def fillObsCPT(bayesNet, gameState):
     vaild probability distribution for this case. To conform with the
     autograder, use the *food house distribution* over colors when both the food
     house and ghost house are assigned to the same cell.
+
+    BLUE_OBS_VAL = "blue"
+    RED_OBS_VAL = "red"
+    NO_OBS_VAL = "none"
+    OBS_VALS = [BLUE_OBS_VAL, RED_OBS_VAL, NO_OBS_VAL]
+
+     You'll find it easiest to first loop over possible house positions, 
+     then over possible walls for each house, 
+     and finally over assignments to (wall color, ghost house position, food house position) triples. 
+     Remember to create a separate factor for every one of the 4*7=28 possible observation positions.
     """
 
     bottomLeftPos, topLeftPos, bottomRightPos, topRightPos = gameState.getPossibleHouses()
 
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    for housePos in gameState.getPossibleHouses():
+        for obsPos in gameState.getHouseWalls(housePos):
+            
 
 def getMostLikelyFoodHousePosition(evidence, bayesNet, eliminationOrder):
     """
