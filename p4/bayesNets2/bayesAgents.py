@@ -116,7 +116,7 @@ def constructBayesNet(gameState):
                 variableDomainsDict[obsVar] = [BLUE_OBS_VAL, RED_OBS_VAL, NO_OBS_VAL]
 
     variableDomainsDict[X_POS_VAR] = [FOOD_LEFT_VAL, GHOST_LEFT_VAL]
-    variableDomainsDict[Y_POS_VAR] = [BOTH_TOP_VAL, LEFT_BOTTOM_VAL, BOTH_TOP_VAL, BOTH_BOTTOM_VAL]
+    variableDomainsDict[Y_POS_VAR] = [LEFT_TOP_VAL, LEFT_BOTTOM_VAL, BOTH_TOP_VAL, BOTH_BOTTOM_VAL]
     variableDomainsDict[FOOD_HOUSE_VAR] = [TOP_LEFT_VAL, TOP_RIGHT_VAL, BOTTOM_LEFT_VAL, BOTTOM_RIGHT_VAL]
     variableDomainsDict[GHOST_HOUSE_VAR] = [TOP_LEFT_VAL, TOP_RIGHT_VAL, BOTTOM_LEFT_VAL, BOTTOM_RIGHT_VAL]
 
@@ -160,12 +160,9 @@ def fillYCPT(bayesNet, gameState):
     PROB_BOTH_TOP, PROB_BOTH_BOTTOM, PROB_ONLY_LEFT_TOP, \
     PROB_ONLY_LEFT_BOTTOM, PROB_FOOD_RED, PROB_GHOST_RED
     """
-
-
     yFactor = bn.Factor([Y_POS_VAR], [], bayesNet.variableDomainsDict())
 
     "*** YOUR CODE HERE ***"
-
     yFactor.setProbability({Y_POS_VAR: BOTH_TOP_VAL}, PROB_BOTH_TOP)
     yFactor.setProbability({Y_POS_VAR: BOTH_BOTTOM_VAL}, PROB_BOTH_BOTTOM)
     yFactor.setProbability({Y_POS_VAR: LEFT_TOP_VAL}, PROB_ONLY_LEFT_TOP)
@@ -252,11 +249,11 @@ def fillObsCPT(bayesNet, gameState):
                 x, y = obsPos[0], obsPos[1]
                 gWidth, gHeight = gameState.data.layout.width, gameState.data.layout.height
                 val = ''
-                if x < gWidth / 2 and y < gHeight / 2:
+                if x < gWidth / 2.0 and y < gHeight / 2.0:
                     val = BOTTOM_LEFT_VAL
-                elif x > gWidth / 2 and y < gHeight / 2:
+                elif x > gWidth / 2.0 and y < gHeight / 2.0:
                     val = BOTTOM_RIGHT_VAL
-                elif x < gWidth / 2 and y > gHeight / 2:
+                elif x < gWidth / 2.0 and y > gHeight / 2.0:
                     val = TOP_LEFT_VAL
                 else:
                     val = TOP_RIGHT_VAL
