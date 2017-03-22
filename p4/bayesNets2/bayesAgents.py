@@ -266,8 +266,8 @@ def fillObsCPT(bayesNet, gameState):
                     red = PROB_FOOD_RED
                     blue = 1 - PROB_FOOD_RED
                 elif assignment[GHOST_HOUSE_VAR] == val:
-                    red = 1 - PROB_FOOD_RED
-                    blue = PROB_FOOD_RED
+                    red = PROB_GHOST_RED
+                    blue = 1 - PROB_GHOST_RED
                 else:
                     none = 1
 
