@@ -168,8 +168,8 @@ def fillYCPT(bayesNet, gameState):
 
     yFactor.setProbability({Y_POS_VAR: BOTH_TOP_VAL}, PROB_BOTH_TOP)
     yFactor.setProbability({Y_POS_VAR: BOTH_BOTTOM_VAL}, PROB_BOTH_BOTTOM)
-    yFactor.setProbability({Y_POS_VAR: LEFT_BOTTOM_VAL}, PROB_ONLY_LEFT_BOTTOM)
     yFactor.setProbability({Y_POS_VAR: LEFT_TOP_VAL}, PROB_ONLY_LEFT_TOP)
+    yFactor.setProbability({Y_POS_VAR: LEFT_BOTTOM_VAL}, PROB_ONLY_LEFT_BOTTOM)
 
     bayesNet.setCPT(Y_POS_VAR, yFactor)
 
@@ -272,7 +272,7 @@ def fillObsCPT(bayesNet, gameState):
                     red = 1 - PROB_FOOD_RED
                     blue = PROB_FOOD_RED
                 else:
-                    none = 0
+                    none = 1
 
                 if assignment[OBS_VAR_TEMPLATE % obsPos] == BLUE_OBS_VAL:
                     obsFactor.setProbability(assignment, blue)
