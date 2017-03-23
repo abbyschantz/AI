@@ -144,8 +144,8 @@ def inferenceByVariableEliminationWithCallTracking(callTrackingList=None):
                 """eliminate current variable if there exists more than one
                 unconditioned variable, and then append that to the joinableFactors,
                 as there exists another variable that could be joined."""
-                elimFactor = eliminate(joinedFactor, variable)
-                joinableFactors.append(elimFactor)
+                elimedFactor = eliminate(joinedFactor, variable)
+                joinableFactors.append(elimedFactor)
 
         """Join all factors once individual order of variable elimination
         has been completed, normalize and return"""
