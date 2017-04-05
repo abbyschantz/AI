@@ -75,6 +75,17 @@ class DiscreteDistribution(dict):
         {}
         """
         "*** YOUR CODE HERE ***"
+        totalSum = DiscreteDistribution.total(self)
+        if totalSum == 0:
+            return self
+        if self == {}:
+            return {}
+        for item in self:
+            orig = self[item]
+            new = orig/totalSum
+            self[item]= new
+        return self
+
 
     def sample(self):
         """
@@ -98,6 +109,21 @@ class DiscreteDistribution(dict):
         0.0
         """
         "*** YOUR CODE HERE ***"
+        randomNumber = random.random()
+        normalized = DiscreteDistribution.normalize(self)
+        itemsList = [[key, value] for key, value in normalized.items()]
+        itemsSorted = sorted(itemsList, key=lambda prob: prob[1])
+        base = 0
+        for i in range(len(itemsSorted)):
+            wall = base + randomNumber
+            if itemsSorted[i][1] > wall:
+                # print("in if itemsSorted",itemsSorted[i][1])
+                return itemsSorted[i][1]
+            else:
+                base += itemsSorted[i][1]
+                # print("in else adding", itemsSorted[i][1], "base is", base )
+
+
 
 
 class InferenceModule:
@@ -165,8 +191,20 @@ class InferenceModule:
     def getObservationProb(self, noisyDistance, pacmanPosition, ghostPosition, jailPosition):
         """
         Return the probability P(noisyDistance | pacmanPosition, ghostPosition).
+
+        busters.getObservationProbability(noisyDistance, trueDistance), 
+        which returns P(noisyDistance | trueDistance) and is provided for you
         """
         "*** YOUR CODE HERE ***"
+        trueDistance = manhattanDistance(pacmanPosition, ghostPosition)
+        if noisyDistance == None and ghostPosition[0] == jailPosition[0] and ghostPosition[1] == jailPosition[1]:
+            return 1
+        if noisyDistance == None:
+            return 0
+        if ghostPosition[0] == jailPosition[0] and ghostPosition[1] == jailPosition[1]:
+            return 0
+        noisyDisGivingTrueDist = busters.getObservationProbability(noisyDistance, trueDistance)
+        return noisyDisGivingTrueDist
 
     def setGhostPosition(self, gameState, ghostPosition, index):
         """
