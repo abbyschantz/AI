@@ -134,6 +134,7 @@ class GreedyBustersAgent(BustersAgent):
         not yet been captured, then chooses an action that brings
         Pacman closest to the closest ghost (according to mazeDistance!).
         """
+        print("BEGIN")
         pacmanPosition = gameState.getPacmanPosition()
         legal = [a for a in gameState.getLegalPacmanActions()]
         livingGhosts = gameState.getLivingGhosts()
@@ -141,3 +142,54 @@ class GreedyBustersAgent(BustersAgent):
             [beliefs for i, beliefs in enumerate(self.ghostBeliefs)
              if livingGhosts[i+1]]
         "*** YOUR CODE HERE ***"
+        #self.distancer.getDistance(pos1, pos2) 
+        #successorPosition = Actions.getSuccessor(position, action)
+        minDistance = float('inf')
+        minDistPos = (0,0)
+        bestAction = ''
+        minActionDis = float('inf')
+        # for belief in livingGhostPositionDistributions:
+        #     newPos = livingGhostPositionDistributions
+        #     print("new position is", newPos)
+        #     print("legal is", legal)
+            # newDist = self.distancer.getDistance(pacmanPosition, newPos)
+            # print("new distance is", newDist)
+            # if newDist < minDistance:
+            #     minDistance = newDist
+            #     minDistPos = newPos
+        
+        #I want to find the closest ghost and then figure out which action to take to get there? 
+        for distribution in livingGhostPositionDistributions:
+            newPos = distribution.argMax()
+            #print("likely position", newPos)
+            newDistance = self.distancer.getDistance(pacmanPosition, newPos)
+            if newDistance < minDistance:
+                #print("new distance", newDistance)
+                minDistance = newDistance
+                minDistPos = newPos
+        for action in legal:
+            #print("loop action is", action)
+            nextPos = Actions.getSuccessor(pacmanPosition, action)
+            #print("next position is", nextPos)
+            newActionDistance = self.distancer.getDistance(nextPos, minDistPos)
+            if newActionDistance < minActionDis:
+                #print("new action", newActionDistance)
+                minActionDis = newActionDistance
+                bestAction = action
+        return bestAction
+
+
+
+
+
+
+
+
+
+        return 'west'
+
+
+
+
+
+
