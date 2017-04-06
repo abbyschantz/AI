@@ -75,16 +75,21 @@ class DiscreteDistribution(dict):
         {}
         """
         "*** YOUR CODE HERE ***"
+        # totalSum = DiscreteDistribution.total(self)
+        # if totalSum == 0:
+        #     return self
+        # if self == {}:
+        #     return {}
+        # for item in self:
+        #     orig = self[item]
+        #     new = orig/totalSum
+        #     self[item]= new
+        # return self
+
         totalSum = DiscreteDistribution.total(self)
-        if totalSum == 0:
-            return self
-        if self == {}:
-            return {}
-        for item in self:
-            orig = self[item]
-            new = orig/totalSum
-            self[item]= new
-        return self
+        if not totalSum == 0:
+            for key, prob in self.items():
+                self[key] = prob/totalSum
 
 
     def sample(self):
@@ -109,19 +114,28 @@ class DiscreteDistribution(dict):
         0.0
         """
         "*** YOUR CODE HERE ***"
-        randomNumber = random.random()
-        normalized = DiscreteDistribution.normalize(self)
-        itemsList = [[key, value] for key, value in normalized.items()]
-        itemsSorted = sorted(itemsList, key=lambda prob: prob[1])
-        base = 0
-        for i in range(len(itemsSorted)):
-            wall = base + randomNumber
-            if itemsSorted[i][1] > wall:
-                # print("in if itemsSorted",itemsSorted[i][1])
-                return itemsSorted[i][1]
-            else:
-                base += itemsSorted[i][1]
-                # print("in else adding", itemsSorted[i][1], "base is", base )
+        # randomNumber = random.random()
+        # normalized = DiscreteDistribution.normalize(self)
+        # itemsList = [[key, value] for key, value in normalized.items()]
+        # itemsSorted = sorted(itemsList, key=lambda prob: prob[1])
+        # base = 0
+        # for i in range(len(itemsSorted)):
+        #     wall = base + itemsSorted[i][1]
+        #     if itemsSorted[i][1] < wall:
+        #         # print("in if itemsSorted",itemsSorted[i][1])
+        #         return itemsSorted[i][0]
+        #     else:
+        #         base += itemsSorted[i][1]
+        #         # print("in else adding", itemsSorted[i][1], "base is", base )
+
+        total = self.total()
+        randomNumber = random.uniform(0, total)
+        currProb = 0
+        for key, prob in self.items():
+            if currProb + prob >= randomNumber:
+                return key
+            currProb += prob
+
 
 
 
@@ -316,7 +330,8 @@ class ExactInference(InferenceModule):
         jailPosition = self.getJailPosition()
         for pos in self.allPositions:
             noisyDisGivingTrueDist = self.getObservationProb(observation, pacmanPosition, pos, jailPosition)
-            belief = self.beliefs.normalize()[pos]
+            self.beliefs.normalize()
+            belief = self.beliefs[pos]
             newBelief = (noisyDisGivingTrueDist*belief)
             self.beliefs[pos] = newBelief
 
@@ -342,7 +357,8 @@ class ExactInference(InferenceModule):
             newPosDist = self.getPositionDistribution(gameState, oldPos)
             for p in newPosDist:
                 probPos = newPosDist[p]
-                belief = self.beliefs.normalize()[oldPos]
+                self.beliefs.normalize()
+                belief = self.beliefs[oldPos]
                 newBelief[p] += (belief * probPos)
         self.beliefs = newBelief
 
@@ -397,8 +413,74 @@ class ParticleFilter(InferenceModule):
         When all particles receive zero weight, the list of particles should
         be reinitialized by calling initializeUniformly. The total method of
         the DiscreteDistribution may be useful.
+
+
+         self.getObservationProb to find the probability of an observation given Pacman's position, 
+         a potential ghost position, and the jail position
+
+         sample method of the DiscreteDistribution
+
+         gameState.getPacmanPosition(), and the jail position using self.getJailPosition()
+
         """
         "*** YOUR CODE HERE ***"
+        particleDistribution = DiscreteDistribution()
+        pacmanPosition = gameState.getPacmanPosition()
+        jailPosition = self.getJailPosition()
+        particles = self.particles
+
+
+        for i in range(len(particles)):
+            if not particles[0] == None:
+                # print("particle", particle)
+                # print("observation", observation)
+                # print("pacmanPosition", pacmanPosition)
+                # print("jailPosition", jailPosition)
+                # print("particles", particles[i])
+                prob = self.getObservationProb(observation, pacmanPosition, particles[i], jailPosition)
+                # print("prob =", prob)
+                particleDistribution[particles[i]] += prob
+                # print("particle in", particleDistribution[particles[i]])
+        particleDistribution.normalize()
+        print("PARTICLE distribution", particleDistribution)
+
+
+        if particleDistribution.total() == 0:
+            self.initializeUniformly(gameState)
+            particleDistribution = self.getBeliefDistribution()
+            particles = self.particles
+
+        # newParticlesList = []
+        # for i in range(len(particles)):
+        #     print("PARTICLE DIST", particleDistribution)
+        #     # print("TEST", particleDistribution.sample())
+        #     newParticlesList.append(particleDistribution.sample())
+        #     print("new particles list", newParticlesList)
+        #     # print("new particle list", newParticlesList)
+        # self.particles = newParticlesList
+
+
+        # self.particles = []
+        # for i in range(self.numParticles):
+        #     self.particles.append(particleDistribution.sample())
+        # print("self.particles", self.particles)
+        self.particles = []
+        for i in range(len(particles)):
+            self.particles.append(particleDistribution.sample())
+        print("self.particles", self.particles)
+
+        # for i in range(len(self.particles)):
+        #     for gPos in self.legalPositions:
+        #         gNoisyDist = self.getObservationProb(observation, pacmanPosition, gPos, jailPosition)
+        #         # print("gNoisyDist", gNoisyDist)
+        #         partBelief = self.particles[i]
+        #         print("partBelief", partBelief)
+        #         # newBelief = (gNoisyDist*partBelief)
+                # # print("newBelief", newBelief)
+                # self.beliefs[i] = newBelief
+                # #self.particles[i] = newBelief
+
+
 
     def elapseTime(self, gameState):
         """
@@ -415,11 +497,11 @@ class ParticleFilter(InferenceModule):
         essentially converts a list of particles into a belief distribution.
         """
         "*** YOUR CODE HERE ***"
-        print("STARTING GET BELIEF DISTRIBUTION")
         self.beliefs = DiscreteDistribution()
         for position in self.legalPositions:
             self.beliefs[position] = 1.0
-        return self.beliefs.normalize()
+        self.beliefs.normalize()
+        return self.beliefs
 
 
 class JointParticleFilter(ParticleFilter):
