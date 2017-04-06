@@ -442,7 +442,7 @@ class ParticleFilter(InferenceModule):
                 particleDistribution[particles[i]] += prob
                 # print("particle in", particleDistribution[particles[i]])
         particleDistribution.normalize()
-        print("PARTICLE distribution", particleDistribution)
+        # print("PARTICLE distribution", particleDistribution)
 
 
         if particleDistribution.total() == 0:
@@ -465,9 +465,16 @@ class ParticleFilter(InferenceModule):
         #     self.particles.append(particleDistribution.sample())
         # print("self.particles", self.particles)
         self.particles = []
-        for i in range(len(particles)):
-            self.particles.append(particleDistribution.sample())
-        print("self.particles", self.particles)
+        # for i in range(len(particles)):
+        #     self.particles.append(particleDistribution.sample())
+        # print("self.particles", self.particles)
+
+        for particle in particleDistribution:
+            print("particle =", particle)
+            print("particle twice =", particleDistribution[particle])
+            print("sample", particleDistribution.sample())
+            self.particles.append(particle)
+            self.beliefs[particle] = particleDistribution[particle]
 
         # for i in range(len(self.particles)):
         #     for gPos in self.legalPositions:
