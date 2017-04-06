@@ -364,6 +364,7 @@ class ParticleFilter(InferenceModule):
 
     def initializeUniformly(self, gameState):
         """
+        Q5
         Initialize a list of particles. Use self.numParticles for the number of
         particles. Use self.legalPositions for the legal board positions where
         a particle could be located. Particles should be evenly (not randomly)
@@ -372,6 +373,18 @@ class ParticleFilter(InferenceModule):
         """
         self.particles = []
         "*** YOUR CODE HERE ***"
+        numLegalPositions = len(self.legalPositions)
+        div = numLegalPositions/self.numParticles
+        counter = 0
+        for i in range(numLegalPositions):
+            if counter == 0:
+                self.particles.append(self.legalPositions[i])
+            else:
+                if counter == (div-1):
+                    counter = 0
+                else:
+                    counter += 1
+
 
     def observeUpdate(self, observation, gameState):
         """
@@ -396,11 +409,17 @@ class ParticleFilter(InferenceModule):
 
     def getBeliefDistribution(self):
         """
+        Q5
         Return the agent's current belief state, a distribution over ghost
         locations conditioned on all evidence and time passage. This method
         essentially converts a list of particles into a belief distribution.
         """
         "*** YOUR CODE HERE ***"
+        print("STARTING GET BELIEF DISTRIBUTION")
+        self.beliefs = DiscreteDistribution()
+        for position in self.legalPositions:
+            self.beliefs[position] = 1.0
+        return self.beliefs.normalize()
 
 
 class JointParticleFilter(ParticleFilter):
