@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -137,49 +137,31 @@ class GreedyBustersAgent(BustersAgent):
         pacmanPosition = gameState.getPacmanPosition()
         legal = [a for a in gameState.getLegalPacmanActions()]
         livingGhosts = gameState.getLivingGhosts()
-        livingGhostPositionDistributions = \
-            [beliefs for i, beliefs in enumerate(self.ghostBeliefs)
-             if livingGhosts[i+1]]
+        livingGhostPositionDistributions = [beliefs for i, beliefs in enumerate(self.ghostBeliefs) if livingGhosts[i+1]]
         "*** YOUR CODE HERE ***"
-        #self.distancer.getDistance(pos1, pos2) 
-        #successorPosition = Actions.getSuccessor(position, action)
-        minDistance = float('inf')
-        minDistPos = None
-        bestAction = None
-        minActionDis = float('inf')
-        # for belief in livingGhostPositionDistributions:
-        #     newPos = livingGhostPositionDistributions
-        #     print("new position is", newPos)
-        #     print("legal is", legal)
-            # newDist = self.distancer.getDistance(pacmanPosition, newPos)
-            # print("new distance is", newDist)
-            # if newDist < minDistance:
-            #     minDistance = newDist
-            #     minDistPos = newPos
-        
-        #I want to find the closest ghost and then figure out which action to take to get there? 
+
+        bestPosProbability = -1*float('inf')
+        bestPos = None
+        #I want to find the closest ghost and then figure out which action to take to get there?
+        i = 0
         for distribution in livingGhostPositionDistributions:
             newPos = distribution.argMax()
-            #print("likely position", newPos)
-            newDistance = self.distancer.getDistance(pacmanPosition, newPos)
-            if newDistance < minDistance:
-                #print("new distance", newDistance)
-                minDistance = newDistance
-                minDistPos = newPos
+            newPosProb = livingGhostPositionDistributions[i][newPos]
+            if newPosProb >= bestPosProbability:
+                bestPosProbability = newPosProb
+                bestPos = newPos
+
+            i+=1
+
+        bestAction = None
+        minActionDis = float('inf')
         for action in legal:
             #print("loop action is", action)
             nextPos = Actions.getSuccessor(pacmanPosition, action)
             #print("next position is", nextPos)
-            newActionDistance = self.distancer.getDistance(nextPos, minDistPos)
+            newActionDistance = self.distancer.getDistance(nextPos, bestPos)
             if newActionDistance < minActionDis:
                 #print("new action", newActionDistance)
                 minActionDis = newActionDistance
                 bestAction = action
         return bestAction
-
-
-
-
-
-
-

@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -16,6 +16,7 @@ import itertools
 import random
 import busters
 import game
+import util
 
 from util import manhattanDistance
 
@@ -206,7 +207,7 @@ class InferenceModule:
         """
         Return the probability P(noisyDistance | pacmanPosition, ghostPosition).
 
-        busters.getObservationProbability(noisyDistance, trueDistance), 
+        busters.getObservationProbability(noisyDistance, trueDistance),
         which returns P(noisyDistance | trueDistance) and is provided for you
         """
         "*** YOUR CODE HERE ***"
@@ -347,9 +348,9 @@ class ExactInference(InferenceModule):
         current position is known.
 
         newPosDist = self.getPositionDistribution(gameState, oldPos)
-        Where oldPos refers to the previous ghost position. newPosDist is a DiscreteDistribution object, 
-        where for each position p in self.allPositions, newPosDist[p] is the probability that the ghost is 
-        at position p at time t + 1, given that the ghost is at position oldPos at time t. 
+        Where oldPos refers to the previous ghost position. newPosDist is a DiscreteDistribution object,
+        where for each position p in self.allPositions, newPosDist[p] is the probability that the ghost is
+        at position p at time t + 1, given that the ghost is at position oldPos at time t.
         """
         "*** YOUR CODE HERE ***"
         newBelief = DiscreteDistribution()
@@ -415,7 +416,7 @@ class ParticleFilter(InferenceModule):
         the DiscreteDistribution may be useful.
 
 
-         self.getObservationProb to find the probability of an observation given Pacman's position, 
+         self.getObservationProb to find the probability of an observation given Pacman's position,
          a potential ghost position, and the jail position
 
          sample method of the DiscreteDistribution
@@ -424,6 +425,40 @@ class ParticleFilter(InferenceModule):
 
         """
         "*** YOUR CODE HERE ***"
+
+        currBeliefs = self.getBeliefDistribution()
+        updatedBeliefs = util.Counter()
+
+        """update all probabilities to new counter containing updated beliefs and normalize after"""
+        """Normalize after as otherwise it distorts distribution"""
+        pacmanPos = gameState.getPacmanPosition()
+        for currPosition in self.legalPositions:
+            trueDistance = util.manhattanDistance(pacmanPos, currPosition)
+            observationProb = busters.getObservationProbability(observation, trueDistance)
+            if observationProb > 0:
+                updatedBeliefs[currPosition] = observationProb * currBeliefs[currPosition]
+        updatedBeliefs.normalize()
+
+
+        """add all new samples"""
+        if updatedBeliefs.totalCount() != 0:
+            self.particles = []
+            i = 0
+            while i < self.numParticles:
+                self.particles.append(util.sampleFromCounter(updatedBeliefs))
+                i+=1
+        else:
+            self.initializeUniformly(gameState, self.numParticles)
+
+
+        if observation == 999:
+            self.particles = []
+            i = 0
+            while i < self.numParticles:
+                self.particles.append(self.getJailPosition())
+                i+=1
+
+        """
         particleDistribution = DiscreteDistribution()
         pacmanPosition = gameState.getPacmanPosition()
         jailPosition = self.getJailPosition()
@@ -470,9 +505,9 @@ class ParticleFilter(InferenceModule):
         # print("self.particles", self.particles)
 
         for particle in particleDistribution:
-            print("particle =", particle)
-            print("particle twice =", particleDistribution[particle])
-            print("sample", particleDistribution.sample())
+            #print("particle =", particle)
+            #print("particle twice =", particleDistribution[particle])
+            #print("sample", particleDistribution.sample())
             self.particles.append(particle)
             self.beliefs[particle] = particleDistribution[particle]
 
@@ -486,8 +521,7 @@ class ParticleFilter(InferenceModule):
                 # # print("newBelief", newBelief)
                 # self.beliefs[i] = newBelief
                 # #self.particles[i] = newBelief
-
-
+        """
 
     def elapseTime(self, gameState):
         """
