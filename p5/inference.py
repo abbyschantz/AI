@@ -512,11 +512,18 @@ class JointParticleFilter(ParticleFilter):
 
          itertools.product to get an implementation of the Cartesian product
          -- shuffle these to make it random 
+         product()  p, q, ... [repeat=1]    cartesian product, equivalent to a nested for-loop
         """
         self.particles = []
         "*** YOUR CODE HERE ***"
         legalPositions = self.legalPositions
-        
+        cartesianProduct = itertools.product(legalPositions, repeat=self.numGhosts)
+        cpList = list(cartesianProduct)
+        random.shuffle(cpList)
+        for i in range(self.numParticles):
+            self.particles += cpList
+
+
 
     def addGhostAgent(self, agent):
         """
