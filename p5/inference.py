@@ -554,13 +554,55 @@ class JointParticleFilter(ParticleFilter):
         When all particles receive zero weight, the list of particles should
         be reinitialized by calling initializeUniformly. The total method of
         the DiscreteDistribution may be useful.
+
+        for i in range(self.numGhosts):
+            ...
+        self.getJailPosition(i)
+
+        self.getObservationProb to find the probability of an observation given Pacman's position, 
+            a potential ghost position, and the jail position. 
+        The sample method of the DiscreteDistribution class will also be useful.
+
         """
         "*** YOUR CODE HERE ***"
+        pacmanPosition = gameState.getPacmanPosition()
+        particles = self.particles
+        allPositions = self.legalPositions
+        newBeliefs = DiscreteDistribution()
+            
+        for particle in self.particles:
+            prob = 1.0
+            for i in range(self.numGhosts):
+                jailPosition = self.getJailPosition(i)
+                prob *= self.getObservationProb(observation[i], pacmanPosition, particle[i], jailPosition)
+            newBeliefs[particle] += prob
+            
+        newBeliefs.normalize()
+            
+        if newBeliefs.total() == 0:
+            self.initializeUniformly(gameState)
+            newBeliefs = self.getBeliefDistribution()
+            particles = self.particles
+            
+        self.particles = []
+            
+        for i in range(self.numParticles):
+            self.particles.append(newBeliefs.sample())
+
+
+
 
     def elapseTime(self, gameState):
         """
         Sample each particle's next state based on its current state and the
         gameState.
+
+
+        for i in range(self.numGhosts):
+        ...
+
+        newPosDist = self.getPositionDistribution(gameState, prevGhostPositions, i, self.ghostAgents[i])
+
         """
         newParticles = []
         for oldParticle in self.particles:
@@ -568,6 +610,23 @@ class JointParticleFilter(ParticleFilter):
 
             # now loop through and update each entry in newParticle...
             "*** YOUR CODE HERE ***"
+
+            pacmanPosition = gameState.getPacmanPosition()
+            allPositions = self.legalPositions
+            beliefs = self.getBeliefDistribution()
+            newBeliefs = DiscreteDistribution()
+        
+            for i in range(self.numGhosts):
+                newPositionDist = self.getPositionDistribution(gameState, oldParticle, i, self.ghostAgents[i])
+                
+                for newParticle in newParticles:
+                    prob = newBeliefs[newParticle]
+                    newBeliefs[newParticle] += beliefs[oldParticle] * prob
+        
+            self.particles=[]
+        
+            for i in range(self.numParticles):
+                self.particles.append(newBeliefs.sample())
 
             """*** END YOUR CODE HERE ***"""
             newParticles.append(tuple(newParticle))
