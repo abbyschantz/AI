@@ -270,11 +270,9 @@ class InferenceModule:
     # Methods that need to be overridden #
     ######################################
 
-    def initializeUniformly(self, gameState):
         """
         Set the belief state to a uniform prior belief over all positions.
         """
-        raise NotImplementedError
 
     def observeUpdate(self, observation, gameState):
         """
@@ -431,16 +429,18 @@ class ParticleFilter(InferenceModule):
 
         """update all probabilities to new counter containing updated beliefs and normalize after"""
         """Normalize after as otherwise it distorts distribution"""
+
         pacmanPos = gameState.getPacmanPosition()
+        jailPos = self.getJailPosition()
         for currPosition in self.legalPositions:
             trueDistance = util.manhattanDistance(pacmanPos, currPosition)
-            observationProb = busters.getObservationProbability(observation, trueDistance)
+            observationProb = self.getObservationProb(observation, pacmanPos, currPosition, jailPos)
             if observationProb > 0:
                 updatedBeliefs[currPosition] = observationProb * currBeliefs[currPosition]
         updatedBeliefs.normalize()
 
 
-        """add all new samples"""
+        #add all new samples
         if updatedBeliefs.totalCount() != 0:
             self.particles = []
             i = 0
@@ -448,80 +448,7 @@ class ParticleFilter(InferenceModule):
                 self.particles.append(util.sampleFromCounter(updatedBeliefs))
                 i+=1
         else:
-            self.initializeUniformly(gameState, self.numParticles)
-
-
-        if observation == 999:
-            self.particles = []
-            i = 0
-            while i < self.numParticles:
-                self.particles.append(self.getJailPosition())
-                i+=1
-
-        """
-        particleDistribution = DiscreteDistribution()
-        pacmanPosition = gameState.getPacmanPosition()
-        jailPosition = self.getJailPosition()
-        particles = self.particles
-
-
-        for i in range(len(particles)):
-            if not particles[0] == None:
-                # print("particle", particle)
-                # print("observation", observation)
-                # print("pacmanPosition", pacmanPosition)
-                # print("jailPosition", jailPosition)
-                # print("particles", particles[i])
-                prob = self.getObservationProb(observation, pacmanPosition, particles[i], jailPosition)
-                # print("prob =", prob)
-                particleDistribution[particles[i]] += prob
-                # print("particle in", particleDistribution[particles[i]])
-        particleDistribution.normalize()
-        # print("PARTICLE distribution", particleDistribution)
-
-
-        if particleDistribution.total() == 0:
             self.initializeUniformly(gameState)
-            particleDistribution = self.getBeliefDistribution()
-            particles = self.particles
-
-        # newParticlesList = []
-        # for i in range(len(particles)):
-        #     print("PARTICLE DIST", particleDistribution)
-        #     # print("TEST", particleDistribution.sample())
-        #     newParticlesList.append(particleDistribution.sample())
-        #     print("new particles list", newParticlesList)
-        #     # print("new particle list", newParticlesList)
-        # self.particles = newParticlesList
-
-
-        # self.particles = []
-        # for i in range(self.numParticles):
-        #     self.particles.append(particleDistribution.sample())
-        # print("self.particles", self.particles)
-        self.particles = []
-        # for i in range(len(particles)):
-        #     self.particles.append(particleDistribution.sample())
-        # print("self.particles", self.particles)
-
-        for particle in particleDistribution:
-            #print("particle =", particle)
-            #print("particle twice =", particleDistribution[particle])
-            #print("sample", particleDistribution.sample())
-            self.particles.append(particle)
-            self.beliefs[particle] = particleDistribution[particle]
-
-        # for i in range(len(self.particles)):
-        #     for gPos in self.legalPositions:
-        #         gNoisyDist = self.getObservationProb(observation, pacmanPosition, gPos, jailPosition)
-        #         # print("gNoisyDist", gNoisyDist)
-        #         partBelief = self.particles[i]
-        #         print("partBelief", partBelief)
-        #         # newBelief = (gNoisyDist*partBelief)
-                # # print("newBelief", newBelief)
-                # self.beliefs[i] = newBelief
-                # #self.particles[i] = newBelief
-        """
 
     def elapseTime(self, gameState):
         """
@@ -529,6 +456,13 @@ class ParticleFilter(InferenceModule):
         gameState.
         """
         "*** YOUR CODE HERE ***"
+
+        """unsure what index corresponds to"""
+        newParticles = []
+        for index, oldPos in enumerate(self.particles):
+            newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, oldPos, index))
+            newParticles.append(util.sample(newPosDist))
+        self.particles = tmpParticles
 
     def getBeliefDistribution(self):
         """
