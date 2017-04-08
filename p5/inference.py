@@ -109,7 +109,7 @@ class DiscreteDistribution(dict):
         0.0
         """
         "*** YOUR CODE HERE ***"
-
+        
         total = self.total()
         randomNumber = random.uniform(0, total)
         currProb = 0
@@ -316,7 +316,7 @@ class ExactInference(InferenceModule):
         for position in self.allPositions:
             prob = self.beliefs[position]
             newProb = self.getObservationProb(observation, pacmanPosition, position, jailPosition)
-
+            
             self.beliefs[position] = newProb*prob
 
         self.beliefs.normalize()
@@ -349,7 +349,7 @@ class ExactInference(InferenceModule):
             for newPosition in newPositionDist:
                 prob = newPositionDist[newPosition]
                 newBelief[newPosition] += beliefs[oldPosition] * prob
-
+        
         self.beliefs = newBelief
 
 
@@ -431,20 +431,20 @@ class ParticleFilter(InferenceModule):
         particles = self.particles
         allPositions = self.legalPositions
         newBeliefs = DiscreteDistribution()
-
+        
         for particle in self.particles:
             prob = self.getObservationProb(observation, pacmanPosition, particle, jailPosition)
             newBeliefs[particle] += prob
-
+        
         newBeliefs.normalize()
-
+        
         if newBeliefs.total() == 0:
             self.initializeUniformly(gameState)
             newBeliefs = self.getBeliefDistribution()
             particles = self.particles
-
+        
         self.particles = []
-
+        
         for i in range(self.numParticles):
             self.particles.append(newBeliefs.sample())
 
@@ -459,16 +459,16 @@ class ParticleFilter(InferenceModule):
         allPositions = self.legalPositions
         beliefs = self.getBeliefDistribution()
         newBeliefs = DiscreteDistribution()
-
+        
         for oldPosition in allPositions:
             newPositionDist = self.getPositionDistribution(gameState, oldPosition)
-
+            
             for newPosition in newPositionDist:
                 prob = newPositionDist[newPosition]
                 newBeliefs[newPosition] += beliefs[oldPosition] * prob
-
+        
         self.particles=[]
-
+        
         for i in range(self.numParticles):
             self.particles.append(newBeliefs.sample())
 
@@ -485,7 +485,7 @@ class ParticleFilter(InferenceModule):
             self.beliefs[particle] += 1.0
         self.beliefs.normalize()
         return self.beliefs
-
+        
 
 class JointParticleFilter(ParticleFilter):
     """
@@ -511,17 +511,23 @@ class JointParticleFilter(ParticleFilter):
         uniform prior.
 
          itertools.product to get an implementation of the Cartesian product
-         -- shuffle these to make it random
+         -- shuffle these to make it random 
          product()  p, q, ... [repeat=1]    cartesian product, equivalent to a nested for-loop
         """
         self.particles = []
         "*** YOUR CODE HERE ***"
+
         legalPositions = self.legalPositions
-        cartesianProduct = itertools.product(legalPositions, repeat=self.numGhosts)
-        cpList = list(cartesianProduct)
-        random.shuffle(cpList)
-        for i in range(self.numParticles):
-            self.particles += cpList
+        cartesianProduct = list(itertools.product(legalPositions, repeat = self.numGhosts))
+        random.shuffle(cartesianProduct)
+        count = 0
+        while count < self.numParticles:
+            for position in cartesianProduct:
+                if count < self.numParticles:
+                    self.particles.append(position)
+                    count += 1
+
+
 
 
 
@@ -559,8 +565,8 @@ class JointParticleFilter(ParticleFilter):
             ...
         self.getJailPosition(i)
 
-        self.getObservationProb to find the probability of an observation given Pacman's position,
-            a potential ghost position, and the jail position.
+        self.getObservationProb to find the probability of an observation given Pacman's position, 
+            a potential ghost position, and the jail position. 
         The sample method of the DiscreteDistribution class will also be useful.
 
         """
@@ -569,23 +575,23 @@ class JointParticleFilter(ParticleFilter):
         particles = self.particles
         allPositions = self.legalPositions
         newBeliefs = DiscreteDistribution()
-
+            
         for particle in self.particles:
             prob = 1.0
             for i in range(self.numGhosts):
                 jailPosition = self.getJailPosition(i)
                 prob *= self.getObservationProb(observation[i], pacmanPosition, particle[i], jailPosition)
             newBeliefs[particle] += prob
-
+            
         newBeliefs.normalize()
-
+            
         if newBeliefs.total() == 0:
             self.initializeUniformly(gameState)
             newBeliefs = self.getBeliefDistribution()
             particles = self.particles
-
+            
         self.particles = []
-
+            
         for i in range(self.numParticles):
             self.particles.append(newBeliefs.sample())
 
@@ -611,19 +617,16 @@ class JointParticleFilter(ParticleFilter):
             # now loop through and update each entry in newParticle...
             "*** YOUR CODE HERE ***"
 
-            pacmanPosition = gameState.getPacmanPosition()
-            allPositions = self.legalPositions
-            beliefs = self.getBeliefDistribution()
-            newBeliefs = DiscreteDistribution()
-            print oldParticle
+
             for i in range(self.numGhosts):
                 newPositionDist = self.getPositionDistribution(gameState, oldParticle, i, self.ghostAgents[i])
-                newPos = newPositionDist.sample()
-                newParticle[i] = newPos
+                newPosition = newPositionDist.sample()
+                newParticle[i] = newPosition
+
+
             """*** END YOUR CODE HERE ***"""
             newParticles.append(tuple(newParticle))
         self.particles = newParticles
-        print self.particles
 
 
 # One JointInference module is shared globally across instances of MarginalInference
