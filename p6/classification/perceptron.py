@@ -55,7 +55,29 @@ class PerceptronClassifier:
             print "Starting iteration ", iteration, "..."
             for i in range(len(trainingData)):
                 "*** YOUR CODE HERE ***"
-                util.raiseNotDefined()
+                #given a feature vector f (in our case, a map from pixel locations to indicators of whether they are on), we score each class with:
+                    #score(f,y) = sum(f of i * w of i ^y)
+                # Then we choose the class with highest score as the predicted label for that data instance
+
+                best = None
+                maxY = None
+                y = trainingLabels[i]
+                allLabels = self.legalLabels
+                trainingPoint = trainingData[i]
+
+                for currY in allLabels:
+                    
+                    currScore = trainingPoint * self.weights[currY]
+                    
+                    if best is None or currScore > best:
+                        best = currScore
+                        maxY = currY
+
+                if maxY != y:
+                    #weight - f
+                    self.weights[maxY] = self.weights[maxY] - trainingPoint
+                    #weight + f 
+                    self.weights[y] = self.weights[y] + trainingPoint
 
     def classify(self, data ):
         """
@@ -80,6 +102,10 @@ class PerceptronClassifier:
         featuresWeights = []
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #It should return a list of the 100 features with highest weight for that label.
+        #Note that, because of the way perceptrons are trained, it is not as crucial to find odds ratios.
+        featuresWeights = self.weights[label]
+        sortedFeaturesWeights = featuresWeights.sortedKeys()
+        featuresWeights = sortedFeaturesWeights[:100]
 
         return featuresWeights
