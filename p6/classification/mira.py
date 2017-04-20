@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -14,6 +14,7 @@
 
 # Mira implementation
 import util
+import copy
 PRINT = True
 
 class MiraClassifier:
@@ -61,9 +62,52 @@ class MiraClassifier:
         representing a vector of values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        cWeights = {}
 
-    def classify(self, data ):
+        for cVal in Cgrid:
+            """need to copy weights over/keep track of for each cVal"""
+            currWeights = copy.deepcopy(self.weights)
+            print "pizza", currWeights
+            print "pasta", self.weights
+            print "training data", trainingData
+            for iteration in range(self.max_iterations):
+                for i in range(len(trainingData)):
+                    guessLabel = self.ourClassify(trainingData[i])
+
+                    if trainingLabels[i] is not guessLabel:
+                        likelyTau = ((currWeights[guessLabel] - currWeights[trainingLabels[i]])*trainingData[i]+1.0)/(2.0*(trainingData[i]*trainingData[i]))
+                        tau = min(cVal, likelyTau)
+                        currWeights[trainingLabels[i]] = \
+                            currWeights[trainingLabels[i]] + trainingData[i].divideAll(1.0/tau)
+                        currWeights[guessLabels] = \
+                            currWeights[guessLabel] - trainingData[i].divideAll(1.0/tau)
+
+                    #else do nothing
+            cWeights[cVal] = currWeights
+
+        cWrong = {}
+        leastErrors = float("inf")
+        for cVal in Cgrid:
+            cWrong[cVal] = 0
+            for i in range(validationData):
+                currLabel = self.ourClassify(validationData[i])
+                if validationLabels[i] is not currLabel:
+                    cWrong[cVal] += 1
+            if leastErrors > cWrong[cVal]:
+                leastErrors = cVal
+
+        self.weights = cWeights[cVal]
+
+    def ourClassify(self, data):
+        # returns the classified data point's guessed label given current weights
+        maxVal, maxLabel = -1*float("inf"), None
+        for l in self.legalLabels:
+            if self.weights[l] * data > maxVal:
+                maxVal, maxLabel = self.weights[l] * data, l
+
+        return maxLabel
+
+    def classify(self, data):
         """
         Classifies each datum as the label that most closely matches the prototype vector
         for that label.  See the project description for details.
@@ -77,5 +121,3 @@ class MiraClassifier:
                 vectors[l] = self.weights[l] * datum
             guesses.append(vectors.argMax())
         return guesses
-
-
