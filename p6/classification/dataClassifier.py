@@ -78,7 +78,15 @@ def enhancedFeatureExtractorDigit(datum):
     features =  basicFeatureExtractorDigit(datum)
 
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # You can add code to the analysis function in dataClassifier.py to inspect what your classifier is doing.
+    # Note: You will be working with digits, so make sure you are using DIGIT_DATUM_WIDTH and DIGIT_DATUM_HEIGHT, 
+    # instead of FACE_DATUM_WIDTH and FACE_DATUM_HEIGHT.
+
+    #consider connected white regions (6,8,9 have 1 or more while 1 and 7 do not)
+
+    pixels = datum.getPixels()
+    digitWidth = DIGIT_DATUM_WIDTH
+    digitHeight = DIGIT_DATUM_HEIGHT
 
     return features
 
