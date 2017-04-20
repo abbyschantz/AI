@@ -62,41 +62,91 @@ class MiraClassifier:
         representing a vector of values.
         """
         "*** YOUR CODE HERE ***"
+        # cWeights = {}
+
+        # for cVal in Cgrid:
+        #     """need to copy weights over/keep track of for each cVal"""
+        #     currWeights = copy.deepcopy(self.weights)
+        #     print "pizza", currWeights
+        #     print "pasta", self.weights
+        #     print "training data", trainingData
+        #     for iteration in range(self.max_iterations):
+        #         for i in range(len(trainingData)):
+        #             guessLabel = self.ourClassify(trainingData[i])
+
+        #             if trainingLabels[i] is not guessLabel:
+        #                 likelyTau = ((currWeights[guessLabel] - currWeights[trainingLabels[i]])*trainingData[i]+1.0)/(2.0*(trainingData[i]*trainingData[i]))
+        #                 tau = min(cVal, likelyTau)
+        #                 currWeights[trainingLabels[i]] = \
+        #                     currWeights[trainingLabels[i]] + trainingData[i].divideAll(1.0/tau)
+        #                 currWeights[guessLabels] = \
+        #                     currWeights[guessLabel] - trainingData[i].divideAll(1.0/tau)
+
+        #             #else do nothing
+        #     cWeights[cVal] = currWeights
+
+        # cWrong = {}
+        # leastErrors = float("inf")
+        # for cVal in Cgrid:
+        #     cWrong[cVal] = 0
+        #     for i in range(validationData):
+        #         currLabel = self.ourClassify(validationData[i])
+        #         if validationLabels[i] is not currLabel:
+        #             cWrong[cVal] += 1
+        #     if leastErrors > cWrong[cVal]:
+        #         leastErrors = cVal
+
+        # self.weights = cWeights[cVal]
         cWeights = {}
-
+        cAccuracy = None
+        allLabels = self.legalLabels
+        
         for cVal in Cgrid:
-            """need to copy weights over/keep track of for each cVal"""
+            
             currWeights = copy.deepcopy(self.weights)
-            print "pizza", currWeights
-            print "pasta", self.weights
-            print "training data", trainingData
             for iteration in range(self.max_iterations):
+                
+                count = 0
                 for i in range(len(trainingData)):
-                    guessLabel = self.ourClassify(trainingData[i])
 
-                    if trainingLabels[i] is not guessLabel:
-                        likelyTau = ((currWeights[guessLabel] - currWeights[trainingLabels[i]])*trainingData[i]+1.0)/(2.0*(trainingData[i]*trainingData[i]))
+                    maxScore = None
+                    maxY = None
+                    for currLabel in allLabels:
+
+                        currScore = trainingData[i] * currWeights[currLabel]
+
+                        if maxScore is None or currScore > maxScore:
+                            maxScore = currScore
+                            maxY = currLabel
+
+                    actualLabel = trainingLabels[count]
+
+                    if maxY != actualLabel:
+
+                        trainingPoint= trainingData[i].copy()
+                        likelyTau = ((currWeights[maxY] - currWeights[actualLabel]) * trainingPoint + 1.0) / (2.0 * (trainingPoint*trainingPoint))
                         tau = min(cVal, likelyTau)
-                        currWeights[trainingLabels[i]] = \
-                            currWeights[trainingLabels[i]] + trainingData[i].divideAll(1.0/tau)
-                        currWeights[guessLabels] = \
-                            currWeights[guessLabel] - trainingData[i].divideAll(1.0/tau)
+                        trainingPoint.divideAll(1.0/tau)
 
-                    #else do nothing
-            cWeights[cVal] = currWeights
+                        currWeights[actualLabel] = currWeights[actualLabel] + trainingPoint
+                        currWeights[maxY] = currWeights[maxY] - trainingPoint
+                    
+                    count += 1
 
-        cWrong = {}
-        leastErrors = float("inf")
-        for cVal in Cgrid:
-            cWrong[cVal] = 0
-            for i in range(validationData):
-                currLabel = self.ourClassify(validationData[i])
-                if validationLabels[i] is not currLabel:
-                    cWrong[cVal] += 1
-            if leastErrors > cWrong[cVal]:
-                leastErrors = cVal
+            actual = 0
+            guessLabel = self.classify(validationData)
+            count = 0
 
-        self.weights = cWeights[cVal]
+            for currLabel in guessLabel:
+                if validationLabels[count] == currLabel:
+                    actual += 1.0
+                count += 1
+            accuracy = actual / len(guessLabel)
+
+            if accuracy > cAccuracy or cAccuracy is None:
+                cAccuracy = accuracy
+                cWeights = currWeights
+        self.weights = cWeights
 
     def ourClassify(self, data):
         # returns the classified data point's guessed label given current weights
