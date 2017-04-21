@@ -72,7 +72,8 @@ def enhancedFeatureExtractorDigit(datum):
     for this datum (datum is of type samples.Datum).
 
     ## DESCRIBE YOUR ENHANCED FEATURES HERE...
-
+        DFS Value of whether == white is found when scanning iteratively through the image vs DFS from one of the white corners of the image.
+        If it finds an equal amount of whites from the corner with DFS, then there isn't a non-contiguous region (ie circle in 8,6,0,4)
     ##
     """
     features = basicFeatureExtractorDigit(datum)
