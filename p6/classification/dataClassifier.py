@@ -180,13 +180,18 @@ def enhancedPacmanFeatures(state, action):
     foodCount = state.getNumFood()
     width = food.width
     height = food.height
+    capsules = state.getCapsules()
+    capsulesCount = len(capsules)
 
     futureState = state.generateSuccessor(0, action)
     futurePacmanPos = futureState.getPacmanPosition()
     futureFood = futureState.getFood()
     futureFoodCount = futureState.getNumFood()
+    futureCapsules = futureState.getCapsules()
+    futureCapsulesCount = len(futureCapsules)
 
     "*** YOUR CODE HERE ***"
+    features['stopped'] = 0
     if action == 'Stop':
         features['stopped'] = 1
 
@@ -199,16 +204,24 @@ def enhancedPacmanFeatures(state, action):
     futureDist = float("inf")
     for x in range(width):
         for y in range(height):
+            #find closest food in current and future state distances
+            #consider making euclidian
+            #consider BFS
             isCurrFood = food[x][y]
             if isCurrFood:
                 tempCurrDist = util.manhattanDistance((x,y), pacmanPos)
                 tempFutureDist = util.manhattanDistance((x,y), futurePacmanPos)
-                currDist = max(tempCurrDist, currDist)
-                futureDist = max(tempFutureDist, futureDist)
+                currDist = min(tempCurrDist, currDist)
+                futureDist = min(tempFutureDist, futureDist)
+
 
     features['foodCloser'] = 0
     if futureFoodCount < foodCount or currDist > futureDist:
         features['foodCloser'] = 1
+
+    features['capsuleConsumed'] = 0
+    if capsulesCount > futureCapsulesCount:
+        features['capsuleConsumed'] = 1
 
     return features
 
