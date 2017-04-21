@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -75,11 +75,11 @@ def enhancedFeatureExtractorDigit(datum):
 
     ##
     """
-    features =  basicFeatureExtractorDigit(datum)
+    features = basicFeatureExtractorDigit(datum)
 
     "*** YOUR CODE HERE ***"
     # You can add code to the analysis function in dataClassifier.py to inspect what your classifier is doing.
-    # Note: You will be working with digits, so make sure you are using DIGIT_DATUM_WIDTH and DIGIT_DATUM_HEIGHT, 
+    # Note: You will be working with digits, so make sure you are using DIGIT_DATUM_WIDTH and DIGIT_DATUM_HEIGHT,
     # instead of FACE_DATUM_WIDTH and FACE_DATUM_HEIGHT.
 
     #consider connected white regions (6,8,9 have 1 or more while 1 and 7 do not)
@@ -87,6 +87,47 @@ def enhancedFeatureExtractorDigit(datum):
     pixels = datum.getPixels()
     digitWidth = DIGIT_DATUM_WIDTH
     digitHeight = DIGIT_DATUM_HEIGHT
+
+    whiteCounter = 0
+    closed = set()
+
+    for y,yArr in enumerate(pixels):
+        for x,xVal in enumerate(yArr):
+            if pixels[y][x] == 0:
+                whiteCounter+=1
+            if pixels[y][x] > 0:
+                closed.add((y,x))
+
+    fringe = util.Queue()
+    if pixels[0][0] == 0:
+        fringe.push((0,0))
+    elif pixels[DIGIT_DATUM_HEIGHT-1][0] == 0:
+        fringe.push((DIGIT_DATUM_HEIGHT-1,0))
+    elif pixels[DIGIT_DATUM_HEIGHT-1][DIGIT_DATUM_WIDTH-1] == 0:
+        fringe.push((DIGIT_DATUM_HEIGHT-1, DIGIT_DATUM_WIDTH-1))
+    elif pixels[0][DIGIT_DATUM_WIDTH-1]:
+        fringe.push((0,DIGIT_DATUM_WIDTH-1))
+    else:
+        print "didn't find a white corner"
+
+    newWhiteCount = 0
+    while not fringe.isEmpty():
+        (y,x) = fringe.pop()
+        if (y,x) not in closed:
+            closed.add((y,x))
+            newWhiteCount += 1
+            if x-1 >= 0:
+                fringe.push((y, x-1))
+            if x+1 < DIGIT_DATUM_WIDTH:
+                fringe.push((y, x+1))
+            if y-1 >= 0:
+                fringe.push((y-1, x))
+            if y+1 < DIGIT_DATUM_HEIGHT:
+                fringe.push((y+1, x))
+
+    features['oneWhiteRegion'] = 0
+    if newWhiteCount == whiteCounter:
+        features['oneWhiteRegion'] = 1
 
     return features
 
@@ -372,7 +413,7 @@ def runClassifier(args, options):
     featureFunction = args['featureFunction']
     classifier = args['classifier']
     printImage = args['printImage']
-    
+
     # Load data
     numTraining = options.training
     numTest = options.test
