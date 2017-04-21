@@ -173,8 +173,43 @@ def enhancedPacmanFeatures(state, action):
     It should return a counter with { <feature name> : <feature value>, ... }
     """
     features = util.Counter()
+    pacmanPos = state.getPacmanPosition()
+    ghostPositions = state.getGhostPositions()
+    numGhosts = state.getNumAgents()-1
+    food = state.getFood()
+    foodCount = state.getNumFood()
+    width = food.width
+    height = food.height
+
+    futureState = state.generateSuccessor(0, action)
+    futurePacmanPos = futureState.getPacmanPosition()
+    futureFood = futureState.getFood()
+    futureFoodCount = futureState.getNumFood()
+
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    if action == 'Stop':
+        features['stopped'] = 1
+
+    features['ghostCloser'] = 0
+    for ghostPos in ghostPositions:
+        if util.manhattanDistance(pacmanPos, ghostPos) > util.manhattanDistance(futurePacmanPos, ghostPos):
+            features['ghostCloser'] = 1
+
+    currDist = float("inf")
+    futureDist = float("inf")
+    for x in range(width):
+        for y in range(height):
+            isCurrFood = food[x][y]
+            if isCurrFood:
+                tempCurrDist = util.manhattanDistance((x,y), pacmanPos)
+                tempFutureDist = util.manhattanDistance((x,y), futurePacmanPos)
+                currDist = max(tempCurrDist, currDist)
+                futureDist = max(tempFutureDist, futureDist)
+
+    features['foodCloser'] = 0
+    if futureFoodCount < foodCount or currDist > futureDist:
+        features['foodCloser'] = 1
+
     return features
 
 
